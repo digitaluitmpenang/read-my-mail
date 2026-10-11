@@ -1,6 +1,6 @@
 // Service worker ringkas: cache shell app supaya app boleh dipasang & dibuka pantas.
 // Network-first untuk fail app sendiri (kemas kini cepat); panggilan Google API tidak di-cache.
-var V = 'rmm-v1';
+var V = 'rmm-v2';
 var SHELL = ['./', 'index.html', 'app-api.js', 'config.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', function (e) {
