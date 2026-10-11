@@ -1,46 +1,22 @@
-/* Simpan fail apps dalam telefon supaya boleh buka tanpa internet.
-   Papar dari simpanan dulu (laju), kemudian ambil versi baru di belakang tabir.
-   Jadi bila fail di GitHub dikemas kini, perubahan nampak pada bukaan seterusnya. */
-const CACHE = 'bajet-bulanan-v2';
-const FAIL = [
-  './',
-  'index.html',
-  'style.css',
-  'app.js',
-  'tarikh-gaji.js',
-  'manifest.webmanifest',
-  'icon-192.png',
-  'icon-512.png',
-  'apple-touch-icon.png',
-];
+// Service worker ringkas: cache shell app supaya app boleh dipasang & dibuka pantas.
+// Network-first untuk fail app sendiri (kemas kini cepat); panggilan Google API tidak di-cache.
+var V = 'rmm-v2';
+var SHELL = ['./', 'index.html', 'app-api.js', 'config.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FAIL)).then(() => self.skipWaiting()));
+self.addEventListener('install', function (e) {
+  e.waitUntil(caches.open(V).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));
 });
-
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys()
-      .then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+self.addEventListener('activate', function (e) {
+  e.waitUntil(caches.keys().then(function (ks) {
+    return Promise.all(ks.filter(function (k) { return k !== V; }).map(function (k) { return caches.delete(k); }));
+  }).then(function () { return self.clients.claim(); }));
 });
-
-self.addEventListener('fetch', (e) => {
-  const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
-
-  e.respondWith(
-    caches.open(CACHE).then(async (cache) => {
-      const tersimpan = await cache.match(req, { ignoreSearch: true });
-      const rangkaian = fetch(req)
-        .then((res) => {
-          if (res && res.ok) cache.put(req, res.clone());
-          return res;
-        })
-        .catch(() => null);
-      if (tersimpan) { e.waitUntil(rangkaian); return tersimpan; }
-      return (await rangkaian) || (await cache.match('index.html')) || Response.error();
-    })
-  );
+self.addEventListener('fetch', function (e) {
+  var req = e.request, url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  e.respondWith(fetch(req).then(function (res) {
+    var copy = res.clone();
+    caches.open(V).then(function (c) { c.put(req, copy); });
+    return res;
+  }).catch(function () { return caches.match(req).then(function (m) { return m || caches.match('index.html'); }); }));
 });
