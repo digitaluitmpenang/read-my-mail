@@ -22,24 +22,30 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <style>
-  :root, :root[data-theme=light] { --blue:#4285F4; --red:#EA4335; --yellow:#FBBC05; --green:#34A853; --bg:#f1f3f4; --card:#fff; --text:#202124; --mute:#5f6368; --line:#dadce0; --hover:#fafafa; --evbg:#f8faff; --evhot:#fef7f6; --gbg:#d9f2e0; --gtx:#17682f; --pbg:#fde1e6; --ptx:#b3243f; --bbg:#d8e8fd; --btx:#1b57b5; --ybg:#fff0b8; --ytx:#7a5800; --sbg:#e8eaed; --stx:#3c4043; --vbg:#ece1fa; --vtx:#6b2fb3; --tc4:#34A853; }
+  :root, :root[data-theme=light] { --blue:#4285F4; --red:#EA4335; --yellow:#FBBC05; --green:#34A853; --bg:#f1f3f4; --card:#fff; --text:#202124; --mute:#5f6368; --line:#dadce0; --hover:#fafafa; --evbg:#f8faff; --evhot:#fef7f6; --gbg:#d9f2e0; --gtx:#17682f; --pbg:#fde1e6; --ptx:#b3243f; --bbg:#d8e8fd; --btx:#1b57b5; --ybg:#fff0b8; --ytx:#7a5800; --sbg:#e8eaed; --stx:#3c4043; --vbg:#e1e6ee; --vtx:#44505f; --tc4:#34A853; }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme=light]):not([data-theme=dark]) { --bg:#202124; --card:#2d2e31; --text:#e8eaed; --mute:#9aa0a6; --line:#3c4043; --hover:#35363a; --evbg:#26303f; --evhot:#3b2a29; --gbg:#24402c; --gtx:#8fd9a6; --pbg:#4a2a30; --ptx:#f4a6b3; --bbg:#243a5c; --btx:#9bc2fa; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#3a2d52; --vtx:#cdb4f5; }
+    :root:not([data-theme=light]):not([data-theme=dark]) { --bg:#202124; --card:#2d2e31; --text:#e8eaed; --mute:#9aa0a6; --line:#3c4043; --hover:#35363a; --evbg:#26303f; --evhot:#3b2a29; --gbg:#24402c; --gtx:#8fd9a6; --pbg:#4a2a30; --ptx:#f4a6b3; --bbg:#243a5c; --btx:#9bc2fa; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#343b46; --vtx:#c6ceda; }
   }
-  :root[data-theme=dark] { --bg:#202124; --card:#2d2e31; --text:#e8eaed; --mute:#9aa0a6; --line:#3c4043; --hover:#35363a; --evbg:#26303f; --evhot:#3b2a29; --gbg:#24402c; --gtx:#8fd9a6; --pbg:#4a2a30; --ptx:#f4a6b3; --bbg:#243a5c; --btx:#9bc2fa; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#3a2d52; --vtx:#cdb4f5; }
+  :root[data-theme=dark] { --bg:#202124; --card:#2d2e31; --text:#e8eaed; --mute:#9aa0a6; --line:#3c4043; --hover:#35363a; --evbg:#26303f; --evhot:#3b2a29; --gbg:#24402c; --gtx:#8fd9a6; --pbg:#4a2a30; --ptx:#f4a6b3; --bbg:#243a5c; --btx:#9bc2fa; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#343b46; --vtx:#c6ceda; }
   /* Tema warna UiTM (biru, ungu, kuning, putih, hitam) */
   :root[data-scheme=uitm] { --blue:#1F3C94; --red:#6A2C91; --yellow:#F5B800; --green:#23232B; --tc4:#23232B; --evbg:#f4f6fc; --evhot:#f6f0fa; --gbg:#e4e4ea; --gtx:#1f1f26; --pbg:#eadcf3; --ptx:#5a2279; --bbg:#dbe3f6; --btx:#1f3c94; --ybg:#fff0b3; --ytx:#6b4d00; }
-  @media (prefers-color-scheme: dark) { :root[data-scheme=uitm]:not([data-theme=light]):not([data-theme=dark]) { --blue:#4D70D4; --red:#9B5CC4; --yellow:#F5B800; --green:#7A7A88; --tc4:#e8eaed; --evbg:#1f2638; --evhot:#2c2236; --gbg:#33333c; --gtx:#e4e4ea; --pbg:#3d2a4a; --ptx:#d9b4f0; --bbg:#233159; --btx:#a9bdf2; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#3a2d52; --vtx:#cdb4f5; } }
-  :root[data-scheme=uitm][data-theme=dark] { --blue:#4D70D4; --red:#9B5CC4; --yellow:#F5B800; --green:#7A7A88; --tc4:#e8eaed; --evbg:#1f2638; --evhot:#2c2236; --gbg:#33333c; --gtx:#e4e4ea; --pbg:#3d2a4a; --ptx:#d9b4f0; --bbg:#233159; --btx:#a9bdf2; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#3a2d52; --vtx:#cdb4f5; }
-  :root[data-scheme=penang] { --blue:#3472CA; --red:#AE523F; --yellow:#F2C200; --green:#00902F; --tc4:#00902F; --evbg:#f3f7fd; --evhot:#fbf1ef; --gbg:#d9f0e1; --gtx:#00692a; --pbg:#f6e0db; --ptx:#8a3a2b; --bbg:#dbe7f8; --btx:#275aa6; --ybg:#fff3b0; --ytx:#6b5600; }
-  @media (prefers-color-scheme: dark) { :root[data-scheme=penang]:not([data-theme=light]):not([data-theme=dark]) { --blue:#6A9BE6; --red:#D98572; --yellow:#F2C200; --green:#3FBF73; --tc4:#3FBF73; --evbg:#1c2638; --evhot:#35241f; --gbg:#1f3a2a; --gtx:#8fe0ac; --pbg:#4a2a24; --ptx:#f0b3a5; --bbg:#233a5f; --btx:#a9c6f5; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#3a2d52; --vtx:#cdb4f5; } }
-  :root[data-scheme=penang][data-theme=dark] { --blue:#6A9BE6; --red:#D98572; --yellow:#F2C200; --green:#3FBF73; --tc4:#3FBF73; --evbg:#1c2638; --evhot:#35241f; --gbg:#1f3a2a; --gtx:#8fe0ac; --pbg:#4a2a24; --ptx:#f0b3a5; --bbg:#233a5f; --btx:#a9c6f5; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#3a2d52; --vtx:#cdb4f5; }
+  @media (prefers-color-scheme: dark) { :root[data-scheme=uitm]:not([data-theme=light]):not([data-theme=dark]) { --blue:#4D70D4; --red:#9B5CC4; --yellow:#F5B800; --green:#7A7A88; --tc4:#e8eaed; --evbg:#1f2638; --evhot:#2c2236; --gbg:#33333c; --gtx:#e4e4ea; --pbg:#3d2a4a; --ptx:#d9b4f0; --bbg:#233159; --btx:#a9bdf2; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#343b46; --vtx:#c6ceda; } }
+  :root[data-scheme=uitm][data-theme=dark] { --blue:#4D70D4; --red:#9B5CC4; --yellow:#F5B800; --green:#7A7A88; --tc4:#e8eaed; --evbg:#1f2638; --evhot:#2c2236; --gbg:#33333c; --gtx:#e4e4ea; --pbg:#3d2a4a; --ptx:#d9b4f0; --bbg:#233159; --btx:#a9bdf2; --ybg:#4a4022; --ytx:#f5d97a; --sbg:#3c4043; --stx:#dadce0; --vbg:#343b46; --vtx:#c6ceda; }
+  :root[data-scheme=penang] { --blue:#00902F; --green:#F2C200; --yellow:#3472CA; --red:#AE523F; --tc4:#00902F; --evbg:#f3f7fd; --evhot:#fbf1ef; --bbg:#c9ecd6; --btx:#00692a; --gbg:#ffe97a; --gtx:#5e4b00; --ybg:#c9dcf6; --ytx:#1d4a96; --pbg:#f3d6cf; --ptx:#8a3a2b; }
+  @media (prefers-color-scheme: dark) { :root[data-scheme=penang]:not([data-theme=light]):not([data-theme=dark]) { --blue:#3FBF73; --green:#F2C200; --yellow:#6A9BE6; --red:#D98572; --tc4:#3FBF73; --evbg:#1c2638; --evhot:#35241f; --bbg:#1f3a2a; --btx:#8fe0ac; --gbg:#4a4022; --gtx:#f5d97a; --ybg:#233a5f; --ytx:#a9c6f5; --pbg:#4a2a24; --ptx:#f0b3a5; --sbg:#3c4043; --stx:#dadce0; } }
+  :root[data-scheme=penang][data-theme=dark] { --blue:#3FBF73; --green:#F2C200; --yellow:#6A9BE6; --red:#D98572; --tc4:#3FBF73; --evbg:#1c2638; --evhot:#35241f; --bbg:#1f3a2a; --btx:#8fe0ac; --gbg:#4a4022; --gtx:#f5d97a; --ybg:#233a5f; --ytx:#a9c6f5; --pbg:#4a2a24; --ptx:#f0b3a5; --sbg:#3c4043; --stx:#dadce0; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:'Google Sans',Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
 
   /* ---------- Asas (telefon / skrin kecil): susun menegak, halaman boleh skrol ---------- */
   header { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--card); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
   #title { font-size:18px; font-weight:700; letter-spacing:.03em; }
+  #flagbar { display:none; height:6px; flex:none; }
+  #flagbar i { flex:1; } #flagbar i:nth-child(1) { background:#3472CA; } #flagbar i:nth-child(2) { background:#fff; } #flagbar i:nth-child(3) { background:#FFFF02; }
+  :root[data-scheme=penang] #flagbar { display:flex; }
+  :root[data-scheme=penang] #title { font-weight:800; }
+  :root[data-scheme=penang] #title .tw span { text-shadow:-1px -1px 0 #14315f,1px -1px 0 #14315f,-1px 1px 0 #14315f,1px 1px 0 #14315f,0 2px 3px rgba(0,0,0,.45); }
+  :root[data-scheme=penang] #title .tw0 span { color:#3472CA !important; } :root[data-scheme=penang] #title .tw1 span { color:#fff !important; } :root[data-scheme=penang] #title .tw2 span { color:#FFFF02 !important; }
   header small, .hs { display:none; }
   .hbtns { display:flex; align-items:center; gap:8px; }
   .btn { border:0; border-radius:18px; padding:8px 16px; font-size:14px; cursor:pointer; background:var(--blue); color:#fff; text-decoration:none; display:inline-block; font-family:inherit; min-height:36px; }
@@ -180,6 +186,7 @@
     <button class="btn" id="refBtn" onclick="load()">↻<span class="hs"> <span data-i="refresh"></span></span></button>
   </div>
 </header>
+<div id="flagbar"><i></i><i></i><i></i></div>
 
 <div id="stats"></div>
 <div id="shell" class="side">
@@ -367,7 +374,11 @@
   // Tajuk berwarna Google
   (function () {
     var c = ['var(--blue)', 'var(--red)', 'var(--yellow)', 'var(--tc4)'], k = 0, h = '';
-    'Read My Mail'.split('').forEach(function (ch) { h += ch === ' ' ? ' ' : '<span style="color:' + c[k++ % 4] + '">' + ch + '</span>'; });
+    'Read My Mail'.split(' ').forEach(function (w, wi) {
+      h += (wi ? ' ' : '') + '<span class="tw tw' + wi + '">';
+      w.split('').forEach(function (ch) { h += '<span style="color:' + c[k++ % 4] + '">' + ch + '</span>'; });
+      h += '</span>';
+    });
     $('title').innerHTML = h;
   })();
 
