@@ -13,7 +13,7 @@
   var GM = 'https://gmail.googleapis.com/gmail/v1/users/me';
   var CAL = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
   var DRIVE = 'https://www.googleapis.com/drive/v3/files';
-  var LIMITS = { MAX_THREADS: 60, EMAIL_THRESHOLD: 3, EVENT_THRESHOLD: 2, DAYS_AHEAD: 3, KEEP_IDS: 300, CONC: 8 };
+  var LIMITS = { MAX_THREADS: 60, EMAIL_THRESHOLD: 3, EVENT_THRESHOLD: 2, DAYS_AHEAD: 3, KEEP_IDS: 300, CONC: 4, FETCH_BUDGET: 30 };
 
   var DEFAULTS = {
     vip: [], muted: [],
@@ -96,7 +96,11 @@
       opt.headers = Object.assign({ Authorization: 'Bearer ' + t }, opt.headers || {});
       return fetch(url, opt).then(function (r) {
         if (r.status === 401 && !retried) { tok = null; lsDel('rmm_tok'); return gfetch(url, opt, true); }
-        if (!r.ok) return r.text().then(function (tx) { throw new Error('API ' + r.status + ': ' + String(tx).substring(0, 180)); });
+        if (!r.ok) return r.text().then(function (tx) {
+          var er = new Error('API ' + r.status + ': ' + String(tx).substring(0, 180));
+          if ((r.status === 403 || r.status === 429) && /quota|rate.?limit/i.test(tx)) er.code = 'QUOTA';
+          throw er;
+        });
         return r.status === 204 ? null : r.json().catch(function () { return null; });
       });
     });
@@ -252,16 +256,21 @@
              preview: c.body.replace(/\s+/g, ' ').substring(0, 220), action: action, done: false, important: important };
   }
 
+  var PARTIAL = false;
   function getEmails(cfg) {
     var q = 'in:inbox newer_than:' + cfg.days + 'd';
     return gfetch(GM + '/threads?maxResults=' + LIMITS.MAX_THREADS + '&q=' + encodeURIComponent(q)).then(function (r) {
-      var list = (r && r.threads) || [], out = [], i = 0;
+      var list = (r && r.threads) || [], out = [], i = 0, budget = LIMITS.FETCH_BUDGET, quotaHit = false;
+      PARTIAL = false;
+      // Emel yang belum ada dalam cache diambil secara berperingkat (had Gmail: unit seminit setiap pengguna).
       function worker() {
         if (i >= list.length) return Promise.resolve();
         var t = list[i++], c = TC[t.id];
-        var p = (c && c.h === t.historyId) ? Promise.resolve(c)
-          : gfetch(GM + '/threads/' + t.id + '?format=full').then(function (th) { var c2 = parseThread(th, t.historyId); TC[t.id] = c2; return c2; });
-        return p.then(function (cc) { out.push(cc); }, function (e) { if (e && e.code === 'AUTH') throw e; }).then(worker);
+        if (c && c.h === t.historyId) { out.push(c); return worker(); }
+        if (quotaHit || budget <= 0) { PARTIAL = true; if (c) out.push(c); return worker(); }
+        budget--;
+        return gfetch(GM + '/threads/' + t.id + '?format=full').then(function (th) { var c2 = parseThread(th, t.historyId); TC[t.id] = c2; out.push(c2); },
+          function (e) { if (e && e.code === 'AUTH') throw e; if (e && e.code === 'QUOTA') quotaHit = true; PARTIAL = true; if (c) out.push(c); }).then(worker);
       }
       var ws = []; for (var k = 0; k < LIMITS.CONC; k++) ws.push(worker());
       return Promise.all(ws).then(function () {
@@ -433,5 +442,5 @@
     var b = document.getElementById('inst'); if (b) b.style.display = 'none';
   }
 
-  window.RMM = { run: mk(null, null), signIn: signIn, signOut: signOut, install: install, _api: API };
+  window.RMM = { run: mk(null, null), signIn: signIn, signOut: signOut, install: install, _api: API, get partial() { return PARTIAL; } };
 })();

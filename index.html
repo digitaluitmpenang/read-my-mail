@@ -220,7 +220,7 @@
 <script>
   var T = {
     ms: {
-      settings:"Tetapan", manual:"Panduan", refresh:"Muat semula", updated:"Kemas kini", loading:"Memuatkan…", error:"Ralat",
+      settings:"Tetapan", quotaMsg:"Had Gmail seminit tercapai. Tunggu sekejap, app akan sambung sendiri.", moreLoading:"Memuatkan baki emel…", manual:"Panduan", refresh:"Muat semula", updated:"Kemas kini", loading:"Memuatkan…", error:"Ralat",
       secAct:"PERLU TINDAKAN", secImp:"EMEL PENTING", secOth:"EMEL LAIN", secToday:"HARI INI",
       secNext:"AKAN DATANG ({n} HARI) · PENTING & DITERIMA", secMore:"PERKARA LAIN · KURANG PENTING / MAYBE / DITOLAK",
       noAct:"Tiada tindakan tertunggak 🎉", noImp:"Tiada emel penting 🎉", noOth:"Tiada emel lain.", noToday:"Tiada acara hari ini.",
@@ -254,7 +254,7 @@
       authCfg:"config.js belum diisi (CLIENT_ID).", authWait:"Google sedang dimuatkan. Cuba tekan butang sekali lagi.", authFail:"Log masuk tidak berjaya. Cuba lagi."
     },
     en: {
-      settings:"Settings", manual:"Guide", refresh:"Refresh", updated:"Updated", loading:"Loading…", error:"Error",
+      settings:"Settings", quotaMsg:"Gmail per-minute limit reached. Please wait a moment, the app will continue by itself.", moreLoading:"Loading remaining mail…", manual:"Guide", refresh:"Refresh", updated:"Updated", loading:"Loading…", error:"Error",
       secAct:"NEEDS ACTION", secImp:"IMPORTANT MAIL", secOth:"OTHER MAIL", secToday:"TODAY",
       secNext:"UPCOMING ({n} DAYS) · IMPORTANT & ACCEPTED", secMore:"OTHERS · LESS IMPORTANT / MAYBE / DECLINED",
       noAct:"Nothing waiting for action 🎉", noImp:"No important mail 🎉", noOth:"No other mail.", noToday:"No events today.",
@@ -370,14 +370,23 @@
     if (!on) $('loader').style.display = 'none';
   }
   window.stopBusy = function () { loading = false; clearTimeout(loadGuard); busy(false); };
+  var nextAt = 0;
   function load() {
     if (loading) return;
     loading = true; busy(true);
     loadGuard = setTimeout(window.stopBusy, 90000);      // jaga-jaga jika panggilan tergantung
     $('upd').textContent = t('loading');
     RMM.run
-      .withSuccessHandler(function (d) { DATA = d; loadedOnce = true; window.stopBusy(); render(); })
-      .withFailureHandler(function (e) { window.stopBusy(); $('upd').textContent = t('error') + ': ' + e.message; })
+      .withSuccessHandler(function (d) {
+        DATA = d; loadedOnce = true; window.stopBusy(); render();
+        var part = RMM.partial; nextAt = Date.now() + (part ? 65000 : (((DATA.settings && DATA.settings.refresh) || 60) * 1000));
+        if (part) $('upd').textContent = t('moreLoading');
+      })
+      .withFailureHandler(function (e) {
+        window.stopBusy();
+        if (e && e.code === 'QUOTA') { nextAt = Date.now() + 70000; $('upd').textContent = t('quotaMsg'); toast(t('quotaMsg')); }
+        else { nextAt = Date.now() + 60000; $('upd').textContent = t('error') + ': ' + e.message; }
+      })
       .getDashboardData();
   }
 
@@ -764,8 +773,7 @@
   applyLang();
   window.addEventListener('load', function () { load(); });
   (function tick() {
-    setTimeout(function () { if (!document.hidden && $('ov').style.display !== 'flex' && $('auth').style.display !== 'flex') load(); tick(); },
-      ((DATA.settings && DATA.settings.refresh) || 60) * 1000);
+    setTimeout(function () { if (Date.now() >= nextAt && !document.hidden && $('ov').style.display !== 'flex' && $('auth').style.display !== 'flex') load(); tick(); }, 10000);
   })();
   // Swipe kiri/kanan pada kad (telefon) + ingat carousel yang terakhir disentuh untuk papan kekunci
   function swipeCard(card, which, len, go, idx) {
