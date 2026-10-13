@@ -261,7 +261,7 @@
       fEv:"Kata kunci acara penting", fMute:"Pengirim KURANG PENTING (alamat atau domain, cth: otter.ai)",
       fAct:"Frasa PERLU TINDAKAN (cth: sila hantar, action required)", fMeet:"Frasa panggilan mesyuarat (DIABAIKAN daripada tindakan)",
       fScheme:"Tema warna", schGoogle:"Google (biru, merah, kuning, hijau)", schUitm:"UiTM (biru, ungu, kuning, putih, hitam)", fRef:"Refresh automatik (saat, 30–600)", fDays:"Imbas emel inbox (hari, 1–30)", fCal:"Kalendar akan datang (hari, 1–30)", fLang:"Bahasa", fTheme:"Paparan warna",
-      thLight:"Cerah", thDark:"Gelap", thSys:"Ikut sistem", fNavPos:"Butang pintasan (PC)", navSide:"Tepi (menegak)", navTop:"Atas (mendatar)",
+      thLight:"Cerah", thDark:"Gelap", thSys:"Ikut sistem", fReplyPos:"Kedudukan balasan (Reply)", rpTop:"Atas emel asal (biasa)", rpBot:"Bawah emel asal", fNavPos:"Butang pintasan (PC)", navSide:"Tepi (menegak)", navTop:"Atas (mendatar)",
       fAuto:"Emel penting yang sudah dibaca", autoKeep:"Kekal di Emel Penting", autoMove:"Pindah ke Emel Lain",
       resetLists:"↺ Pulihkan senarai lalai",
       lblImp:"Penting", tipImp:"Naikkan ke Emel Penting",
@@ -295,7 +295,7 @@
       fEv:"Important-event keywords", fMute:"LESS IMPORTANT senders (address or domain, e.g. otter.ai)",
       fAct:"NEEDS-ACTION phrases (e.g. please send, action required)", fMeet:"Meeting-call phrases (IGNORED for actions)",
       fScheme:"Colour theme", schGoogle:"Google (blue, red, yellow, green)", schUitm:"UiTM (blue, purple, yellow, white, black)", fRef:"Auto refresh (seconds, 30–600)", fDays:"Scan inbox (days, 1–30)", fCal:"Upcoming calendar (days, 1–30)", fLang:"Language", fTheme:"Colour mode",
-      thLight:"Light", thDark:"Dark", thSys:"Follow system", fNavPos:"Shortcut buttons (PC)", navSide:"Side (vertical)", navTop:"Top (horizontal)",
+      thLight:"Light", thDark:"Dark", thSys:"Follow system", fReplyPos:"Reply position", rpTop:"Above original email (default)", rpBot:"Below original email", fNavPos:"Shortcut buttons (PC)", navSide:"Side (vertical)", navTop:"Top (horizontal)",
       fAuto:"Important mail you have already read", autoKeep:"Keep in Important Mail", autoMove:"Move to Other Mail",
       resetLists:"↺ Restore default lists",
       lblImp:"Important", tipImp:"Move up to Important Mail",
@@ -342,6 +342,7 @@
     return '\n\n\nOn ' + dt.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' }) + ' at ' + dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }) + ', ' + d.from + ' wrote:\n' + txt.split('\n').map(function (l) { return '> ' + l; }).join('\n');
   }
   function compose(to, cc, subj, q) {
+    if (q && ((DATA.settings || {}).replyPos === 'bottom')) q = q.replace(/^\n+/, '') + '\n\n';
     q = q ? '&body=' + encodeURIComponent(q) : '';
     if (appMode()) return 'mailto:' + to + '?' + (cc ? 'cc=' + encodeURIComponent(cc) + '&' : '') + 'subject=' + encodeURIComponent('Re: ' + subj.replace(/^re:\s*/i, '')) + q;
     return 'https://mail.google.com/mail/?authuser=' + encodeURIComponent(DATA.me) + '&view=cm&fs=1&to=' + encodeURIComponent(to) +
@@ -728,6 +729,7 @@
       '<label class="lbl">' + t('fLang') + '</label>' + radios('sLang', s.lang || 'en', [['ms', 'Bahasa Melayu'], ['en', 'English']]) +
       '<label class="lbl">' + t('fScheme') + '</label>' + radios('sScheme', s.scheme || 'google', [['google', t('schGoogle')], ['uitm', t('schUitm')]]) +
       '<label class="lbl">' + t('fTheme') + '</label>' + radios('sTheme', s.theme || 'system', [['system', t('thSys')], ['light', t('thLight')], ['dark', t('thDark')]]) +
+      '<label class="lbl">' + t('fReplyPos') + '</label>' + radios('sRP', s.replyPos || 'top', [['top', t('rpTop')], ['bottom', t('rpBot')]]) +
       '<label class="lbl">' + t('fNavPos') + '</label>' + radios('sNav', s.navPos || 'side', [['side', t('navSide')], ['top', t('navTop')]]) +
       (ANDROID ? '<label class="lbl">' + t('fOpen') + '</label>' + radios('sOpen', cached('rmm_open', 'app'), [['app', t('openApp')], ['web', t('openWeb')]]) : '') +
       '<label class="lbl">' + t('fAuto') + '</label>' + radios('sAuto', s.autoDemote ? 'move' : 'keep', [['keep', t('autoKeep')], ['move', t('autoMove')]]) +
@@ -741,7 +743,7 @@
   function saveSet() {
     var L = function (id) { return $(id).value.split(/\n|,/).map(function (x) { return x.trim(); }).filter(Boolean); };
     var data = { vip:L('sVip'), keywords:L('sKw'), muted:L('sMute'), actionWords:L('sAct'), meetingWords:L('sMeet'), eventKeywords:L('sEv'),
-                 refresh:$('sRef').value, days:$('sDays').value, calDays:$('sCal').value, lang:rv('sLang'), scheme:rv('sScheme'), theme:rv('sTheme'), navPos:rv('sNav'), autoDemote:rv('sAuto') === 'move' };
+                 refresh:$('sRef').value, days:$('sDays').value, calDays:$('sCal').value, lang:rv('sLang'), scheme:rv('sScheme'), theme:rv('sTheme'), navPos:rv('sNav'), replyPos:rv('sRP'), autoDemote:rv('sAuto') === 'move' };
     if (rv('sOpen')) { try { localStorage.setItem('rmm_open', rv('sOpen')); } catch (e) {} }
     showM('<h3>' + t('saving') + '</h3>');
     RMM.run.withSuccessHandler(function (st) { DATA.settings = st; applyPrefs(); closeM(); load(); })
