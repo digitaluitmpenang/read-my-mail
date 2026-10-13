@@ -334,7 +334,9 @@
   var ST = { accepted: 'YES', declined: 'NO', tentative: 'MAYBE', needsAction: 'INVITED' };
   function getEvents(cfg) {
     var s = new Date(); s.setHours(0, 0, 0, 0);
-    var e = new Date(s.getTime() + ((cfg.calDays || 5) + 1) * 86400000);
+    var cd = (cfg.calDays || 5), dow = (s.getDay() + 6) % 7, need = Math.max(cd + 1, 7 - dow);
+    var shownEnd = s.getTime() + (cd + 1) * 86400000;
+    var e = new Date(s.getTime() + need * 86400000);
     var url = CAL + '?singleEvents=true&orderBy=startTime&maxResults=250&timeMin=' + encodeURIComponent(s.toISOString()) + '&timeMax=' + encodeURIComponent(e.toISOString());
     return gfetch(url).then(function (r) {
       return ((r && r.items) || []).filter(function (x) { return x.status !== 'cancelled'; }).map(function (x) {
@@ -350,6 +352,7 @@
         var org = x.organizer ? (x.organizer.displayName ? x.organizer.displayName + ' <' + (x.organizer.email || '') + '>' : (x.organizer.email || '')) : '';
         var join = x.hangoutLink || ((x.conferenceData && x.conferenceData.entryPoints || []).filter(function (p) { return p.entryPointType === 'video'; })[0] || {}).uri || '';
         return {
+          extra: new Date(x.start.dateTime || (x.start.date + 'T00:00:00')).getTime() >= shownEnd,
           id: x.id, force: ((STATE && STATE.evUp) || []).indexOf(x.id) > -1 ? 'imp' : (((STATE && STATE.evDown) || []).indexOf(x.id) > -1 ? 'oth' : ''),
           canRsvp: !!self && !(x.organizer && x.organizer.self),
           title: title, allDay: allDay,

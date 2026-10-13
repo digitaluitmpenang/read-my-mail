@@ -48,6 +48,11 @@
   .nv { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 2px; color:var(--blue); text-decoration:none; font-size:10px; font-weight:600; letter-spacing:.04em; border-radius:12px; }
   .nv .ic { line-height:1; display:flex; } .nv .ic .ico { width:24px; height:24px; stroke-width:1.7; }
   main { display:flex; flex-direction:column; gap:12px; padding:12px 12px 8px; }
+  #stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:10px 12px 0; }
+  .st { background:var(--card); border:1px solid var(--line); border-top:3px solid var(--blue); border-radius:10px; padding:6px 8px; cursor:pointer; min-width:0; text-align:left; font-family:inherit; color:var(--text); }
+  .st b { display:block; font-size:22px; line-height:1.15; font-weight:700; }
+  .st span { display:block; font-size:11px; color:var(--mute); line-height:1.25; }
+  .st.c1 { border-top-color:var(--yellow); } .st.c2 { border-top-color:var(--red); } .st.c3 { border-top-color:var(--mute); } .st.c4 { border-top-color:var(--blue); } .st.c5 { border-top-color:var(--green); } .st.c6 { border-top-color:var(--yellow); }
   #credit { text-align:center; font-size:11px; color:var(--mute); padding:2px 12px 78px; line-height:1.5; }
   #credit b { color:var(--text); font-weight:600; }
 
@@ -144,6 +149,8 @@
     main { flex:1; min-width:0; min-height:0; display:grid; grid-template-columns:minmax(0,2.1fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr); gap:16px; padding:16px 24px 16px 12px; }
     #shell.top main { padding-left:24px; }
     #credit { padding:0 0 8px; flex:none; }
+    #stats { grid-template-columns:repeat(6,1fr); gap:12px; padding:12px 24px 0; flex:none; }
+    .st b { font-size:24px; }
     .left { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:minmax(0,2fr) minmax(0,3fr); gap:16px; min-height:0; min-width:0; }
     .col { display:flex; flex-direction:column; gap:16px; min-height:0; min-width:0; }
     .col section { flex:1 1 0; }
@@ -169,6 +176,7 @@
   </div>
 </header>
 
+<div id="stats"></div>
 <div id="shell" class="side">
 <nav id="nav"></nav>
 <main>
@@ -239,7 +247,7 @@
   var T = {
     ms: {
       settings:"Tetapan", quotaMsg:"Had Gmail seminit tercapai. Tunggu sekejap, app akan sambung sendiri.", moreLoading:"Memuatkan baki emel…", manual:"Panduan", refresh:"Muat semula", updated:"Kemas kini", loading:"Memuatkan…", error:"Ralat",
-      secAct:"PERLU TINDAKAN", secImp:"EMEL PENTING", secOth:"EMEL LAIN", secToday:"HARI INI",
+      stAct:"Perlu tindakan", stImp:"Emel penting", stUnr:"Emel lain belum dibaca", stNew:"Emel baru hari ini", stToday:"Mesyuarat/acara hari ini", stWeek:"Minggu ini", secAct:"PERLU TINDAKAN", secImp:"EMEL PENTING", secOth:"EMEL LAIN", secToday:"HARI INI",
       secNext:"AKAN DATANG ({n} HARI) · PENTING & DITERIMA", secMore:"PERKARA LAIN · KURANG PENTING / MAYBE / DITOLAK",
       noAct:"Tiada tindakan tertunggak 🎉", noImp:"Tiada emel penting 🎉", noOth:"Tiada emel lain.", noToday:"Tiada acara hari ini.",
       noNext:"Tiada acara penting {n} hari akan datang.", none:"Tiada.",
@@ -273,7 +281,7 @@
     },
     en: {
       settings:"Settings", quotaMsg:"Gmail per-minute limit reached. Please wait a moment, the app will continue by itself.", moreLoading:"Loading remaining mail…", manual:"Guide", refresh:"Refresh", updated:"Updated", loading:"Loading…", error:"Error",
-      secAct:"NEEDS ACTION", secImp:"IMPORTANT MAIL", secOth:"OTHER MAIL", secToday:"TODAY",
+      stAct:"Needs action", stImp:"Important mail", stUnr:"Other mail unread", stNew:"New mail today", stToday:"Meetings/events today", stWeek:"This week", secAct:"NEEDS ACTION", secImp:"IMPORTANT MAIL", secOth:"OTHER MAIL", secToday:"TODAY",
       secNext:"UPCOMING ({n} DAYS) · IMPORTANT & ACCEPTED", secMore:"OTHERS · LESS IMPORTANT / MAYBE / DECLINED",
       noAct:"Nothing waiting for action 🎉", noImp:"No important mail 🎉", noOth:"No other mail.", noToday:"No events today.",
       noNext:"No important events in the next {n} days.", none:"None.",
@@ -676,6 +684,7 @@
     DATA.events.forEach(function (e, i) {
       var other = e.status === 'NO' || e.status === 'MAYBE';
       var sec = evSec(e);
+      if (e.extra) return;
       if (sec === 'A') A += evHtml(e, i, false);
       else if (sec === 'N') N += evHtml(e, i, true);
       else O += evHtml(e, i, true);
@@ -796,11 +805,30 @@
   }
 
   // ===== UMUM =====
+  function renderStats() {
+    var now = new Date(), td = now.toDateString(), s0 = new Date(now); s0.setHours(0, 0, 0, 0);
+    var dow = (now.getDay() + 6) % 7, wkEnd = s0.getTime() + (7 - dow) * 86400000;
+    var em = DATA.emails || [], ev = (DATA.events || []).filter(function (e) { return e.status !== 'NO'; });
+    var nToday = ev.filter(function (e) { return new Date(e.start).getTime() < s0.getTime() + 86400000 && new Date(e.end).getTime() > s0.getTime(); }).length;
+    var nWeek = ev.filter(function (e) { return new Date(e.start).getTime() < wkEnd && new Date(e.end).getTime() > s0.getTime(); }).length;
+    var items = [
+      [actList().length, 'stAct', 'c1', '.s-act'],
+      [impList().length, 'stImp', 'c2', '.s-imp'],
+      [othList().filter(function (m) { return m.unread; }).length, 'stUnr', 'c3', '.s-oth'],
+      [em.filter(function (m) { return new Date(m.date).toDateString() === td; }).length, 'stNew', 'c4', '.s-oth'],
+      [nToday, 'stToday', 'c5', '.s-today'],
+      [nWeek, 'stWeek', 'c6', '.s-next']
+    ];
+    $('stats').innerHTML = items.map(function (x) {
+      return '<button class="st ' + x[2] + '" onclick="goSec(\'' + x[3] + '\')"><b>' + x[0] + '</b><span>' + esc(t(x[1])) + '</span></button>';
+    }).join('');
+  }
+  function goSec(sel) { var e = document.querySelector(sel); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   function render() {
     applyPrefs();
     var valid = {}; DATA.emails.forEach(function (m) { valid[m.id] = 1; });
     Object.keys(sel).forEach(function (k) { if (!valid[k]) delete sel[k]; });
-    renderAct(); renderImp(); renderOth(); renderCal(); renderNav();
+    renderAct(); renderImp(); renderOth(); renderCal(); renderNav(); renderStats();
     $('upd').textContent = t('updated') + ' ' + fT(DATA.updated);
   }
   function showM(h) { $('modal').innerHTML = h; $('ov').style.display = 'flex'; }
