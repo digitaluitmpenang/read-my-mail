@@ -37,7 +37,10 @@
   #nav { position:fixed; left:0; right:0; bottom:0; z-index:6; display:flex; justify-content:space-around; background:var(--card); border-top:1px solid var(--line); padding:6px 4px calc(6px + env(safe-area-inset-bottom)); }
   .nv { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 2px; color:var(--blue); text-decoration:none; font-size:10px; font-weight:600; letter-spacing:.04em; border-radius:12px; }
   .nv .ic { line-height:1; display:flex; } .nv .ic .ico { width:24px; height:24px; stroke-width:1.7; }
-  main { display:flex; flex-direction:column; gap:12px; padding:12px 12px 88px; }
+  main { display:flex; flex-direction:column; gap:12px; padding:12px 12px 8px; }
+  #credit { text-align:center; font-size:11px; color:var(--mute); padding:2px 12px 78px; line-height:1.5; }
+  #credit b { color:var(--text); font-weight:600; }
+
   .left, .col { display:contents; }
   .s-act { order:1; } .s-imp { order:2; } .s-today { order:3; } .s-next { order:4; } .s-oth { order:5; } .s-more { order:6; }
   section { background:var(--card); border-radius:12px; padding:12px; box-shadow:0 1px 3px rgba(60,64,67,.25); border-top:4px solid var(--blue); min-width:0; display:flex; flex-direction:column; min-height:0; }
@@ -130,6 +133,7 @@
     #shell.top .nv { background:var(--card); border:1px solid var(--line); }
     main { flex:1; min-width:0; min-height:0; display:grid; grid-template-columns:minmax(0,2.1fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr); gap:16px; padding:16px 24px 16px 12px; }
     #shell.top main { padding-left:24px; }
+    #credit { padding:0 0 8px; flex:none; }
     .left { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:minmax(0,2fr) minmax(0,3fr); gap:16px; min-height:0; min-width:0; }
     .col { display:flex; flex-direction:column; gap:16px; min-height:0; min-width:0; }
     .col section { flex:1 1 0; }
@@ -697,7 +701,7 @@
       });
       if (ul) h += '</ul>';
     });
-    showM(h + '<div class="actions" style="margin-top:16px"><button class="btn ghost" onclick="closeM()">' + t('close') + '</button></div></div>');
+    showM(h + '<p style="font-size:11px;color:var(--mute);margin-top:14px">Read My Mail · Developed by FaridAssamani · ©2026</p><div class="actions" style="margin-top:8px"><button class="btn ghost" onclick="closeM()">' + t('close') + '</button></div></div>');
   }
 
   // ===== TETAPAN =====
@@ -804,5 +808,6 @@
   swipeCard($('acard'), 'act', function () { return actList().length; }, stepA, function () { return actIdx; });
 </script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});</script>
+<footer id="credit"><b>Read My Mail</b> · Developed by FaridAssamani · ©2026</footer>
 </body>
 </html>
