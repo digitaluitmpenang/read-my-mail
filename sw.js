@@ -3,7 +3,7 @@
 // App lain di alamat github.io yang sama (cth. /bajet/) berkongsi storan cache;
 // hanya urus cache yang bermula dengan awalan app ini.
 var AWALAN = 'rmm-';
-var V = AWALAN + 'v3';
+var V = AWALAN + 'v4';
 var SHELL = ['./', 'index.html', 'app-api.js', 'config.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', function (e) {
@@ -17,9 +17,9 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   var req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
-  e.respondWith(fetch(req).then(function (res) {
+  e.respondWith(fetch(req, { cache: 'no-cache' }).then(function (res) {
     var copy = res.clone();
     caches.open(V).then(function (c) { c.put(req, copy); });
     return res;
-  }).catch(function () { return caches.match(req).then(function (m) { return m || caches.match('index.html'); }); }));
+  }).catch(function () { return caches.match(req, { ignoreSearch: true }).then(function (m) { return m || caches.match('index.html'); }); }));
 });
