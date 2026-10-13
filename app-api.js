@@ -28,7 +28,7 @@
                   'for your action', 'kindly send', 'kindly submit', 'due by'],
     meetingWords: ['invitation:', 'updated invitation', 'jemputan', 'panggilan mesyuarat', 'mesyuarat',
                    'meeting', 'google meet', 'zoom', 'teams meeting'],
-    refresh: 60, days: 7, calDays: 5, lang: 'en', theme: 'system', navPos: 'side', autoDemote: false
+    refresh: 60, days: 7, calDays: 5, scheme: 'google', lang: 'en', theme: 'system', navPos: 'side', autoDemote: false
   };
   var LIST_KEYS = ['vip', 'muted', 'keywords', 'eventKeywords', 'actionWords', 'meetingWords'];
 
@@ -158,7 +158,7 @@
       var dl = del[k] || [];
       out[k] = base.filter(function (x) { return dl.indexOf(x) < 0; });
     });
-    ['refresh', 'days', 'calDays', 'lang', 'theme', 'navPos', 'autoDemote'].forEach(function (k) { if (saved[k] !== undefined) out[k] = saved[k]; });
+    ['refresh', 'days', 'calDays', 'scheme', 'lang', 'theme', 'navPos', 'autoDemote'].forEach(function (k) { if (saved[k] !== undefined) out[k] = saved[k]; });
     return out;
   }
   function saveSettings(s) {
@@ -172,7 +172,7 @@
     });
     STATE.settings = {
       add: add, del: del, refresh: clamp(s.refresh, 30, 600, DEFAULTS.refresh), days: clamp(s.days, 1, 30, DEFAULTS.days), calDays: clamp(s.calDays, 1, 30, DEFAULTS.calDays),
-      lang: s.lang === 'ms' ? 'ms' : 'en', theme: ['light', 'dark', 'system'].indexOf(s.theme) > -1 ? s.theme : 'system',
+      scheme: s.scheme === 'uitm' ? 'uitm' : 'google', lang: s.lang === 'ms' ? 'ms' : 'en', theme: ['light', 'dark', 'system'].indexOf(s.theme) > -1 ? s.theme : 'system',
       navPos: s.navPos === 'top' ? 'top' : 'side', autoDemote: s.autoDemote === true || s.autoDemote === 'true'
     };
     persist();
