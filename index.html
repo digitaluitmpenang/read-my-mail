@@ -43,6 +43,13 @@
   #flagbar { display:none; height:6px; flex:none; }
   #flagbar i { flex:1; } #flagbar i:nth-child(1) { background:#3472CA; } #flagbar i:nth-child(2) { background:#fff; } #flagbar i:nth-child(3) { background:#FFFF02; }
   :root[data-scheme=penang] #flagbar { display:flex; }
+  :root[data-scheme=uitm] #flagbar { display:flex; }
+  :root[data-scheme=uitm] #flagbar i:nth-child(1) { background:#1F3C94; } :root[data-scheme=uitm] #flagbar i:nth-child(2) { background:#F5B800; } :root[data-scheme=uitm] #flagbar i:nth-child(3) { background:#6A2C91; }
+  :root[data-scheme=uitm] #title { font-weight:800; }
+  :root[data-scheme=uitm] #title .tw span { text-shadow:0 1px 2px rgba(0,0,0,.35); }
+  :root[data-scheme=uitm] #title .tw0 span { color:#1F3C94 !important; } :root[data-scheme=uitm] #title .tw1 span { color:#F5B800 !important; } :root[data-scheme=uitm] #title .tw2 span { color:#6A2C91 !important; }
+  :root[data-scheme=uitm][data-theme=dark] #title .tw0 span { color:#6D8FE8 !important; } :root[data-scheme=uitm][data-theme=dark] #title .tw2 span { color:#B27BDB !important; }
+  @media (prefers-color-scheme: dark) { :root[data-scheme=uitm]:not([data-theme=light]):not([data-theme=dark]) #title .tw0 span { color:#6D8FE8 !important; } :root[data-scheme=uitm]:not([data-theme=light]):not([data-theme=dark]) #title .tw2 span { color:#B27BDB !important; } }
   :root[data-scheme=penang] #title { font-weight:800; }
   :root[data-scheme=penang] #title .tw span { text-shadow:-1px -1px 0 #14315f,1px -1px 0 #14315f,-1px 1px 0 #14315f,1px 1px 0 #14315f,0 2px 3px rgba(0,0,0,.45); }
   :root[data-scheme=penang] #title .tw0 span { color:#3472CA !important; } :root[data-scheme=penang] #title .tw1 span { color:#fff !important; } :root[data-scheme=penang] #title .tw2 span { color:#FFFF02 !important; }
