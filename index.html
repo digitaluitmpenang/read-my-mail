@@ -817,7 +817,7 @@
       [actList().length, 'stAct', 'c1', '.s-act'],
       [impList().length, 'stImp', 'c2', '.s-imp'],
       [othList().filter(function (m) { return m.unread; }).length, 'stUnr', 'c3', '.s-oth'],
-      [em.filter(function (m) { return new Date(m.date).toDateString() === td; }).length, 'stNew', 'c4', '.s-oth'],
+      [DATA.todayCount != null ? DATA.todayCount : em.filter(function (m) { return new Date(m.date).toDateString() === td; }).length, 'stNew', 'c4', 'GM'],
       [nToday, 'stToday', 'c5', '.s-today'],
       [nWeek, 'stWeek', 'c6', '.s-next']
     ];
@@ -826,7 +826,10 @@
       return (i === 4 ? '<i class="sep"></i>' : '') + '<button class="st ' + x[2] + '" title="' + esc(lab.replace('|', ' ')) + '" onclick="goSec(\'' + x[3] + '\')"><b>' + x[0] + '</b><span>' + esc(lab).replace('|', '<br>') + '</span></button>';
     }).join('');
   }
-  function goSec(sel) { var e = document.querySelector(sel); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  function goSec(sel) {
+    if (sel === 'GM') { window.open('https://mail.google.com/mail/?authuser=' + encodeURIComponent(DATA.me) + '#search/' + encodeURIComponent(DATA.todayQ || 'newer_than:1d'), tgt()); return; }
+    var e = document.querySelector(sel); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   function render() {
     applyPrefs();
     var valid = {}; DATA.emails.forEach(function (m) { valid[m.id] = 1; });

@@ -256,6 +256,23 @@
              preview: c.body.replace(/\s+/g, ' ').substring(0, 220), action: action, done: false, important: important };
   }
 
+  // Bilangan emel diterima sejak 00:00 hari ini (Inbox, Arkib, Sampah; tanpa Spam/Sent/Draf/tab Promosi dll/label pengguna)
+  function todayQuery() {
+    var s = new Date(); s.setHours(0, 0, 0, 0);
+    return 'after:' + Math.floor(s.getTime() / 1000) + ' in:anywhere -in:spam -in:sent -in:drafts -from:me -category:promotions -category:social -category:updates -category:forums has:nouserlabels';
+  }
+  function getTodayCount() {
+    var day = new Date().toDateString(), q = todayQuery(), n = 0, pages = 0;
+    function page(tok) {
+      return gfetch(GM + '/messages?maxResults=500&fields=messages/id,nextPageToken&q=' + encodeURIComponent(q) + (tok ? '&pageToken=' + tok : '')).then(function (r) {
+        n += ((r && r.messages) || []).length;
+        if (r && r.nextPageToken && ++pages < 4) return page(r.nextPageToken);
+      });
+    }
+    return page('').then(function () { lsSet('rmm_today', { day: day, n: n }); return { n: n, q: q }; }, function () {
+      var c = lsGet('rmm_today'); return { n: c && c.day === day ? c.n : null, q: q };
+    });
+  }
   var PARTIAL = false;
   function getEmails(cfg) {
     var q = 'in:inbox newer_than:' + cfg.days + 'd';
@@ -396,10 +413,10 @@
     getDashboardData: function () {
       return loadState(true).then(function () {
         var cfg = getSettings();
-        return Promise.all([getMe(), getEmails(cfg), getEvents(cfg)]).then(function (r) {
+        return Promise.all([getMe(), getEmails(cfg), getEvents(cfg), getTodayCount()]).then(function (r) {
           var me = r[0];
           r[2].forEach(function (e) { if (e.link) e.link += (e.link.indexOf('?') > -1 ? '&' : '?') + 'authuser=' + encodeURIComponent(me); });
-          return { me: me, settings: cfg, emails: r[1], events: r[2], updated: new Date().toISOString() };
+          return { me: me, settings: cfg, emails: r[1], events: r[2], todayCount: r[3].n, todayQ: r[3].q, updated: new Date().toISOString() };
         });
       });
     },
