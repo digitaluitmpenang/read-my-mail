@@ -272,7 +272,7 @@
       noNext:"Tiada acara penting {n} hari akan datang.", none:"Tiada.",
       del:"🗑 Padam", delThis:"🗑 Padam", delRow:"Padam", less:"⬇ Kurang penting", done:"✔ Selesai", toAct:"⚑ Perlu tindakan", markImp:"⭐ Penting",
       openGmail:"📧 Buka di Gmail", reply:"↩ Balas", replyAll:"↩↩ Balas Semua",
-      close:"Tutup", cancel:"Batal", yesDel:"Ya, padam", save:"Simpan", openCal:"Buka di Kalendar", mvOth:"Alih ke Perkara Lain", rsvpA:"Terima", rsvpM:"Maybe", rsvpD:"Tolak", toastRsvp:"Jawapan dihantar: {s}.", rsvpWait:"Menghantar jawapan…", mvImp:"Alih ke Penting", toastEvOth:"Dipindah ke Perkara Lain.", toastEvImp:"Dipindah ke senarai penting.",
+      close:"Tutup", autoSaved:"Disimpan automatik ✓", cancel:"Batal", yesDel:"Ya, padam", save:"Simpan", openCal:"Buka di Kalendar", mvOth:"Alih ke Perkara Lain", rsvpA:"Terima", rsvpM:"Maybe", rsvpD:"Tolak", toastRsvp:"Jawapan dihantar: {s}.", rsvpWait:"Menghantar jawapan…", mvImp:"Alih ke Penting", toastEvOth:"Dipindah ke Perkara Lain.", toastEvImp:"Dipindah ke senarai penting.",
       delN:"Padam {n} emel?", delNote:"Emel akan dipindah ke Bin Gmail (boleh dipulihkan dalam 30 hari).", deleting:"Memadam…", saving:"Menyimpan…",
       from:"Dari", to:"Kepada", cc:"Cc", date:"Tarikh", msgs:"{n} mesej", loadMail:"Memuatkan emel…",
       allDay:"Sepanjang hari", time:"Masa", status:"Status anda", location:"Lokasi", guestsN:"{n} orang",
@@ -306,7 +306,7 @@
       noNext:"No important events in the next {n} days.", none:"None.",
       del:"🗑 Delete", delThis:"🗑 Delete", delRow:"Delete", less:"⬇ Less important", done:"✔ Done", toAct:"⚑ Needs action", markImp:"⭐ Important",
       openGmail:"📧 Open in Gmail", reply:"↩ Reply", replyAll:"↩↩ Reply all",
-      close:"Close", cancel:"Cancel", yesDel:"Yes, delete", save:"Save", openCal:"Open in Calendar", mvOth:"Move to Others", rsvpA:"Accept", rsvpM:"Maybe", rsvpD:"Decline", toastRsvp:"Response sent: {s}.", rsvpWait:"Sending response…", mvImp:"Move to Important", toastEvOth:"Moved to Others.", toastEvImp:"Moved to the important list.",
+      close:"Close", autoSaved:"Saved automatically ✓", cancel:"Cancel", yesDel:"Yes, delete", save:"Save", openCal:"Open in Calendar", mvOth:"Move to Others", rsvpA:"Accept", rsvpM:"Maybe", rsvpD:"Decline", toastRsvp:"Response sent: {s}.", rsvpWait:"Sending response…", mvImp:"Move to Important", toastEvOth:"Moved to Others.", toastEvImp:"Moved to the important list.",
       delN:"Delete {n} email(s)?", delNote:"Emails are moved to the Gmail Bin (recoverable for 30 days).", deleting:"Deleting…", saving:"Saving…",
       from:"From", to:"To", cc:"Cc", date:"Date", msgs:"{n} message(s)", loadMail:"Loading email…",
       allDay:"All day", time:"Time", status:"Your status", location:"Location", guestsN:"{n} people",
@@ -420,6 +420,20 @@
   window.hideAuth = function () { $('auth').style.display = 'none'; };
 
   // Penunjuk memuat: donut penuh skrin untuk muat pertama, donut kecil di header untuk refresh
+  var scrollReady = false;
+  (function () {
+    var tm;
+    function save() { if (!scrollReady) return; try { localStorage.setItem('rmm_scroll', JSON.stringify({ y: window.pageYOffset || document.documentElement.scrollTop || 0, t: Date.now() })); } catch (e) {} }
+    window.addEventListener('scroll', function () { clearTimeout(tm); tm = setTimeout(save, 200); }, { passive: true });
+    window.addEventListener('pagehide', save);
+    document.addEventListener('visibilitychange', function () { if (document.hidden) save(); });
+  })();
+  function restoreScroll() {
+    var c = null; try { c = JSON.parse(localStorage.getItem('rmm_scroll')); } catch (e) {}
+    var go = function () { if (c && c.y > 0 && Date.now() - c.t < 864e5 && window.innerWidth <= 1000) window.scrollTo(0, c.y); scrollReady = true; };
+    requestAnimationFrame(function () { requestAnimationFrame(go); });
+    setTimeout(function () { scrollReady = true; }, 3000);
+  }
   var loading = false, loadedOnce = false, loadGuard = null;
   function busy(on) {
     document.body.classList.toggle('busy', on);
@@ -435,7 +449,9 @@
     $('upd').textContent = t('loading');
     RMM.run
       .withSuccessHandler(function (d) {
+        var firstLoad = !loadedOnce;
         DATA = d; loadedOnce = true; window.stopBusy(); render();
+        if (firstLoad) restoreScroll();
         var part = RMM.partial; nextAt = Date.now() + (part ? 65000 : (((DATA.settings && DATA.settings.refresh) || 60) * 1000));
         if (part) $('upd').textContent = t('moreLoading');
       })
@@ -777,7 +793,8 @@
   function rv(name) { var e = document.querySelector('input[name=' + name + ']:checked'); return e ? e.value : ''; }
   function openSettings() {
     var s = DATA.settings || {};
-    showM('<h3>' + t('setTitle') + '</h3><div class="meta">' + t('setNote') + '</div>' +
+    var keepY = $('ov').style.display === 'flex' ? $('modal').scrollTop : 0;
+    showM('<h3>' + t('setTitle') + ' <small id="sSaved" style="font-weight:400;color:var(--green);opacity:0;transition:opacity .3s"></small></h3><div class="meta">' + t('setNote') + '</div>' +
       '<label class="lbl">' + t('fLang') + '</label>' + radios('sLang', s.lang || 'en', [['ms', 'Bahasa Melayu'], ['en', 'English']]) +
       '<label class="lbl">' + t('fScheme') + '</label>' + radios('sScheme', s.scheme || 'google', [['google', t('schGoogle')], ['uitm', t('schUitm')], ['penang', t('schPenang')]]) +
       '<label class="lbl">' + t('fTheme') + '</label>' + radios('sTheme', s.theme || 'system', [['system', t('thSys')], ['light', t('thLight')], ['dark', t('thDark')]]) +
@@ -790,16 +807,25 @@
       '<label class="lbl">' + t('fRef') + '</label><input id="sRef" type="number" min="30" max="600" value="' + (s.refresh || 60) + '">' +
       '<label class="lbl">' + t('fCal') + '</label><input id="sCal" type="number" min="1" max="30" value="' + (s.calDays || 5) + '">' +
       '<label class="lbl">' + t('fDays') + '</label><input id="sDays" type="number" min="1" max="30" value="' + (s.days || 7) + '">' +
-      '<div class="actions" style="margin-top:14px"><button class="btn" onclick="saveSet()">' + t('save') + '</button><button class="btn ghost" onclick="resetSet()">' + t('resetLists') + '</button><button class="btn ghost" onclick="RMM.signOut()">' + t('signOut') + '</button><button class="btn ghost" onclick="closeM()">' + t('cancel') + '</button></div>');
+      '<div class="actions" style="margin-top:14px"><button class="btn ghost" onclick="resetSet()">' + t('resetLists') + '</button><button class="btn ghost" onclick="RMM.signOut()">' + t('signOut') + '</button><button class="btn ghost" onclick="closeM()">' + t('close') + '</button></div>');
+    $('modal').onchange = autoSave; $('modal').scrollTop = keepY;
   }
-  function saveSet() {
+  var saveTimer = null, saving = false, again = false, setDirty = false;
+  function autoSave() { clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 350); }
+  function doSave() {
+    if (saving) { again = true; return; }
+    saving = true;
     var L = function (id) { return $(id).value.split(/\n|,/).map(function (x) { return x.trim(); }).filter(Boolean); };
     var data = { vip:L('sVip'), keywords:L('sKw'), muted:L('sMute'), actionWords:L('sAct'), meetingWords:L('sMeet'), eventKeywords:L('sEv'),
                  refresh:$('sRef').value, days:$('sDays').value, calDays:$('sCal').value, lang:rv('sLang'), scheme:rv('sScheme'), theme:rv('sTheme'), navPos:rv('sNav'), replyPos:rv('sRP'), autoDemote:rv('sAuto') === 'move' };
     if (rv('sOpen')) { try { localStorage.setItem('rmm_open', rv('sOpen')); } catch (e) {} }
-    showM('<h3>' + t('saving') + '</h3>');
-    RMM.run.withSuccessHandler(function (st) { DATA.settings = st; applyPrefs(); closeM(); load(); })
-      .withFailureHandler(function (e) { closeM(); fail(e); }).saveSettings(data);
+    var oldLang = LANG;
+    RMM.run.withSuccessHandler(function (st) {
+      saving = false; setDirty = true; DATA.settings = st; applyPrefs(); render();
+      if (LANG !== oldLang) openSettings();
+      var sv = $('sSaved'); if (sv) { sv.textContent = t('autoSaved'); sv.style.opacity = 1; setTimeout(function () { var e = $('sSaved'); if (e) e.style.opacity = 0; }, 1800); }
+      if (again) { again = false; doSave(); }
+    }).withFailureHandler(function (e) { saving = false; again = false; fail(e); }).saveSettings(data);
   }
   function resetSet() {
     RMM.run.withSuccessHandler(function (st) { DATA.settings = st; closeM(); load(); toast(t('toastReset')); })
@@ -859,7 +885,7 @@
     $('upd').textContent = t('updated') + ' ' + fT(DATA.updated);
   }
   function showM(h) { $('modal').innerHTML = h; $('ov').style.display = 'flex'; }
-  function closeM() { $('ov').style.display = 'none'; }
+  function closeM() { $('ov').style.display = 'none'; clearTimeout(saveTimer); if (setDirty && !saving) { setDirty = false; load(); } }
   function toast(m) {
     var e = $('toast'); e.textContent = m; e.style.display = 'block';
     clearTimeout(window._tt); window._tt = setTimeout(function () { e.style.display = 'none'; }, 6000);
