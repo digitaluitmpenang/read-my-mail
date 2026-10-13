@@ -49,16 +49,17 @@
   #flagbar i:nth-child(4) { display:none; background:#fff; }
   :root[data-scheme=google] #flagbar i:nth-child(4), :root[data-scheme=jalur] #flagbar i:nth-child(4) { display:block; }
   :root[data-scheme=google] #flagbar i:nth-child(1) { background:#4285F4; } :root[data-scheme=google] #flagbar i:nth-child(2) { background:#EA4335; } :root[data-scheme=google] #flagbar i:nth-child(3) { background:#FBBC05; } :root[data-scheme=google] #flagbar i:nth-child(4) { background:#34A853; }
-  :root[data-scheme=jalur] #flagbar i:nth-child(1) { background:#010066; } :root[data-scheme=jalur] #flagbar i:nth-child(2) { background:#FFCC00; } :root[data-scheme=jalur] #flagbar i:nth-child(3) { background:#CC0001; } :root[data-scheme=jalur] #flagbar i:nth-child(4) { background:#fff; }
-  :root[data-scheme=jalur][data-theme=dark] #flagbar i:nth-child(1) { background:#4B5BD6; }
-  @media (prefers-color-scheme: dark) { :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #flagbar i:nth-child(1) { background:#4B5BD6; } }
+  :root[data-scheme=jalur] #flagbar i:nth-child(1) { background:#CC0001; } :root[data-scheme=jalur] #flagbar i:nth-child(2) { background:#fff; } :root[data-scheme=jalur] #flagbar i:nth-child(3) { background:#FFCC00; } :root[data-scheme=jalur] #flagbar i:nth-child(4) { background:#010066; }
+  :root[data-scheme=jalur][data-theme=dark] #flagbar i:nth-child(4) { background:#4B5BD6; }
+  @media (prefers-color-scheme: dark) { :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #flagbar i:nth-child(4) { background:#4B5BD6; } }
   :root[data-scheme=jalur] #title { font-weight:800; }
-  :root[data-scheme=jalur] #title .l0, :root[data-scheme=jalur] #title .l1, :root[data-scheme=jalur] #title .l2, :root[data-scheme=jalur] #title .l3 { color:#010066 !important; }
-  :root[data-scheme=jalur] #title .l4, :root[data-scheme=jalur] #title .l5 { color:#FFCC00 !important; text-shadow:0 1px 2px rgba(0,0,0,.65),0 0 1px rgba(0,0,0,.6); }
-  :root[data-scheme=jalur] #title .l6, :root[data-scheme=jalur] #title .l7 { color:#CC0001 !important; }
-  :root[data-scheme=jalur] #title .l8, :root[data-scheme=jalur] #title .l9 { color:#fff !important; text-shadow:0 1px 2px rgba(0,0,0,.65),0 0 1px rgba(0,0,0,.6); }
-  :root[data-scheme=jalur][data-theme=dark] #title .l0, :root[data-scheme=jalur][data-theme=dark] #title .l1, :root[data-scheme=jalur][data-theme=dark] #title .l2, :root[data-scheme=jalur][data-theme=dark] #title .l3 { color:#6D7BFF !important; }
-  @media (prefers-color-scheme: dark) { :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l0, :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l1, :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l2, :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l3 { color:#6D7BFF !important; } }
+  :root[data-scheme=jalur] #title .l0, :root[data-scheme=jalur] #title .l1, :root[data-scheme=jalur] #title .l2, :root[data-scheme=jalur] #title .l3 { color:#CC0001 !important; }
+  :root[data-scheme=jalur] #title .l4, :root[data-scheme=jalur] #title .l5 { color:#fff !important; text-shadow:0 1px 2px rgba(0,0,0,.65),0 0 1px rgba(0,0,0,.6); }
+  :root[data-scheme=jalur] #title .l6, :root[data-scheme=jalur] #title .l7 { color:#FFCC00 !important; text-shadow:0 1px 2px rgba(0,0,0,.65),0 0 1px rgba(0,0,0,.6); }
+  :root[data-scheme=jalur] #title .l8, :root[data-scheme=jalur] #title .l9 { color:#010066 !important; }
+  :root[data-scheme=jalur][data-theme=dark] #title .l8, :root[data-scheme=jalur][data-theme=dark] #title .l9 { color:#6D7BFF !important; }
+  :root[data-scheme=jalur][data-theme=dark] #title .l0, :root[data-scheme=jalur][data-theme=dark] #title .l1, :root[data-scheme=jalur][data-theme=dark] #title .l2, :root[data-scheme=jalur][data-theme=dark] #title .l3 { color:#E04848 !important; }
+  @media (prefers-color-scheme: dark) { :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l8, :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l9 { color:#6D7BFF !important; } :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l0, :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l1, :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l2, :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) #title .l3 { color:#E04848 !important; } }
   :root[data-scheme=jalur] .st.c5 { background:#010066; color:#fff; }
   :root[data-scheme=jalur][data-theme=dark] .st.c5 { background:#2a2f7a; }
   @media (prefers-color-scheme: dark) { :root[data-scheme=jalur]:not([data-theme=light]):not([data-theme=dark]) .st.c5 { background:#2a2f7a; } }
