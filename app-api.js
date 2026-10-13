@@ -8,7 +8,7 @@
   'use strict';
   var CFG = window.RMM_CONFIG || {};
   var SCOPES = ['https://www.googleapis.com/auth/gmail.modify',
-                'https://www.googleapis.com/auth/calendar.readonly',
+                'https://www.googleapis.com/auth/calendar.events',
                 'https://www.googleapis.com/auth/drive.appdata'].join(' ');
   var GM = 'https://gmail.googleapis.com/gmail/v1/users/me';
   var CAL = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
@@ -333,6 +333,7 @@
         var join = x.hangoutLink || ((x.conferenceData && x.conferenceData.entryPoints || []).filter(function (p) { return p.entryPointType === 'video'; })[0] || {}).uri || '';
         return {
           id: x.id, force: ((STATE && STATE.evUp) || []).indexOf(x.id) > -1 ? 'imp' : (((STATE && STATE.evDown) || []).indexOf(x.id) > -1 ? 'oth' : ''),
+          canRsvp: !!self && !(x.organizer && x.organizer.self),
           title: title, allDay: allDay,
           start: allDay ? new Date(x.start.date + 'T00:00:00').toISOString() : new Date(x.start.dateTime).toISOString(),
           end: allDay ? new Date(x.end.date + 'T00:00:00').toISOString() : new Date(x.end.dateTime).toISOString(),
@@ -341,6 +342,26 @@
           guestList: att.slice(0, 40).map(function (a) { return { name: a.displayName || '', email: a.email, status: a.organizer ? 'OWNER' : (ST[a.responseStatus] || 'INVITED') }; })
         };
       });
+    });
+  }
+
+  // Jawab jemputan (accepted / tentative / declined). Perlu skop calendar.events; jika belum diberi, minta kebenaran sekali lagi.
+  function rsvpEvent(id, resp) {
+    var url = CAL + '/' + encodeURIComponent(id);
+    function go() {
+      return gfetch(url).then(function (ev) {
+        var att = ev.attendees || [], me = att.filter(function (z) { return z.self; })[0];
+        if (!me) throw new Error('Anda bukan tetamu acara ini / You are not a guest of this event');
+        me.responseStatus = resp;
+        return gfetch(url + '?sendUpdates=all', { method: 'PATCH', headers: JSONH, body: JSON.stringify({ attendees: att }) });
+      }).then(function () { return true; });
+    }
+    return go().catch(function (e) {
+      if (/API 403/.test(e.message) && /insufficient|scope/i.test(e.message)) {
+        tok = null; lsDel('rmm_tok');
+        return requestToken('consent').then(go);
+      }
+      throw e;
     });
   }
 
@@ -372,6 +393,7 @@
         return saveSettings(cfg);
       });
     },
+    rsvpEvent: function (id, resp) { return rsvpEvent(id, resp); },
     moveEvent: function (id, to) { return needState().then(function () { var a = to === 'imp' ? 'evUp' : 'evDown', b = to === 'imp' ? 'evDown' : 'evUp'; addMany(a, [id]); removeMany(b, [id]); persist(); return true; }); },
     markDone: function (id) { return needState().then(function () { addMany('dismissed', [id]); ['manual', 'pinned', 'done'].forEach(function (k) { removeMany(k, [id]); }); persist(); return true; }); },
     setActions: function (ids) { return needState().then(function () { addMany('manual', ids); ['done', 'dismissed', 'pinned'].forEach(function (k) { removeMany(k, ids); }); persist(); return true; }); },
