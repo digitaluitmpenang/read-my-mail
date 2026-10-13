@@ -273,9 +273,10 @@
           function (e) { if (e && e.code === 'AUTH') throw e; if (e && e.code === 'QUOTA') quotaHit = true; PARTIAL = true; if (c) out.push(c); }).then(worker);
       }
       var ws = []; for (var k = 0; k < LIMITS.CONC; k++) ws.push(worker());
-      return Promise.all(ws).then(function () {
-        var keep = {}; list.forEach(function (t) { if (TC[t.id]) keep[t.id] = TC[t.id]; });
-        TC = keep; lsSet('rmm_tc', TC);
+      // Simpan kemajuan walaupun ada ralat di tengah (cth. sesi tamat) supaya muat seterusnya tak ulang semua
+      var save = function () { var keep = {}; list.forEach(function (t) { if (TC[t.id]) keep[t.id] = TC[t.id]; }); TC = keep; lsSet('rmm_tc', TC); };
+      return Promise.all(ws).catch(function (e) { save(); throw e; }).then(function () {
+        save();
         return out.map(function (c) { return buildEmail(c, cfg); }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
       });
     });
