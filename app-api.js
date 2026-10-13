@@ -311,8 +311,16 @@
       var all = uniq(replyTo.concat(addrs(to)), me);
       var ccl = uniq(addrs(cc), me).filter(function (a) { return all.indexOf(a) < 0; });
       var hp = findPart(last.payload, 'text/html'), html = hp ? cleanHtml(b64(hp.body.data)) : '';
-      return inlineCids(last, html).then(function (h2) {
-        return { subject: hdr(msgs[0], 'subject'), from: from, to: to, cc: cc, date: new Date(Number(last.internalDate)).toISOString(), count: msgs.length,
+      var shown = msgs.slice(-12);
+      var thread = Promise.all(shown.map(function (m) {
+        var p = findPart(m.payload, 'text/html'), h = p ? cleanHtml(b64(p.body.data)) : '';
+        return inlineCids(m, h).then(function (h3) {
+          return { id: m.id, from: hdr(m, 'from'), to: hdr(m, 'to'), date: new Date(Number(m.internalDate)).toISOString(), html: h3, text: bodyText(m.payload).substring(0, 4000) };
+        });
+      }));
+      return Promise.all([inlineCids(last, html), thread]).then(function (rs) {
+        var h2 = rs[0], thr = rs[1];
+        return { thread: thr, hidden: msgs.length - shown.length, subject: hdr(msgs[0], 'subject'), from: from, to: to, cc: cc, date: new Date(Number(last.internalDate)).toISOString(), count: msgs.length,
                  body: bodyText(last.payload).substring(0, 4000), html: h2, replyTo: replyTo.join(','), replyAllTo: all.join(','), replyAllCc: ccl.join(',') };
       });
     });

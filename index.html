@@ -595,6 +595,26 @@
 
   // ===== BUKA EMEL =====
   function markRead(id) { var m = find(id); if (m) m.unread = false; renderAct(); renderOth(); }
+  function stripQuote(h) {
+    try {
+      var doc = new DOMParser().parseFromString(h, 'text/html');
+      Array.prototype.forEach.call(doc.querySelectorAll('.gmail_quote, blockquote[type=cite], .gmail_extra, #divRplyFwdMsg, #appendonsend'), function (n) { n.remove(); });
+      return doc.body.innerHTML;
+    } catch (e) { return h; }
+  }
+  function threadDoc(d) {
+    var th = d.thread || [];
+    if (th.length < 2) return mailDoc(d);
+    var out = '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124}img{max-width:100%;height:auto}.mh{font-size:12px;color:#5f6368;border-bottom:1px solid #dadce0;padding:4px 0;margin:0 0 8px}.mh b{color:#202124;font-size:13px}.mm{margin-bottom:22px}</style>';
+    if (d.hidden > 0) out += '<div class="mh">… ' + d.hidden + ' ' + (LANG === 'ms' ? 'mesej lebih awal tidak dipaparkan' : 'earlier message(s) not shown') + '</div>';
+    th.forEach(function (m, i) {
+      var body;
+      if (m.html) { body = i === 0 ? m.html : stripQuote(m.html); if (i && !body.replace(/<[^>]*>|&nbsp;|\s/g, '')) body = m.html; }
+      else { var tx = i === 0 ? m.text : m.text.split(/\n+\s*(?:On .{5,120}wrote:|-{2,}\s*Original Message|From:\s.+\nSent:)/i)[0]; body = '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">' + esc(tx || m.text) + '</pre>'; }
+      out += '<div class="mm"><div class="mh"><b>' + esc(m.from) + '</b> · ' + esc(new Date(m.date).toLocaleString(loc())) + '</div>' + body + '</div>';
+    });
+    return out;
+  }
   function mailDoc(d) {
     var inner = d.html || '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">' + esc(d.body) + '</pre>';
     return '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124}img{max-width:100%;height:auto}</style>' + inner;
@@ -616,7 +636,7 @@
       b += B('pk', 'trash', L('delRow'), { on: "confirmDel(['" + id + "'])" }) + '<button class="btn ghost" onclick="closeM()">' + t('close') + '</button>';
       showM('<h3>' + esc(d.subject) + '</h3><div class="meta"><b>' + t('from') + ':</b> ' + esc(d.from) + '<br><b>' + t('to') + ':</b> ' + esc(d.to) +
         (d.cc ? '<br><b>' + t('cc') + ':</b> ' + esc(d.cc) : '') + '<br><b>' + t('date') + ':</b> ' + new Date(d.date).toLocaleString(loc()) + ' · ' + t('msgs', { n: d.count }) + '</div>' +
-        '<iframe class="mframe" sandbox="allow-popups allow-popups-to-escape-sandbox" srcdoc="' + attr(mailDoc(d)) + '"></iframe><div class="actions">' + b + '</div>');
+        '<iframe class="mframe" sandbox="allow-popups allow-popups-to-escape-sandbox" srcdoc="' + attr(threadDoc(d)) + '"></iframe><div class="actions">' + b + '</div>');
     }).withFailureHandler(function (e) { closeM(); fail(e); }).getEmailDetail(id);
   }
   function bulkOne(id) { sel = {}; sel[id] = 1; closeM(); bulkImp(); }
