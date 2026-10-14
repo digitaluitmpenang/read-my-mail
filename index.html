@@ -21,6 +21,8 @@
 <meta name="apple-mobile-web-app-title" content="Read My Mail">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
+<!-- Statistik penggunaan (GoatCounter): tanpa cookie; tiada emel, nama atau kandungan dihantar -->
+<script data-goatcounter="https://farawyadal.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <style>
   :root, :root[data-theme=light] { --blue:#4285F4; --red:#EA4335; --yellow:#FBBC05; --green:#34A853; --bg:#f1f3f4; --card:#fff; --text:#202124; --mute:#5f6368; --line:#dadce0; --hover:#fafafa; --evbg:#f8faff; --evhot:#fef7f6; --gbg:#d9f2e0; --gtx:#17682f; --pbg:#fde1e6; --ptx:#b3243f; --bbg:#d8e8fd; --btx:#1b57b5; --ybg:#fff0b8; --ytx:#7a5800; --sbg:#e8eaed; --stx:#3c4043; --vbg:#e1e6ee; --vtx:#44505f; --tc4:#34A853; }
   @media (prefers-color-scheme: dark) {
@@ -1050,6 +1052,19 @@
 
   document.documentElement.setAttribute('data-theme', cached('rmm_theme', 'system'));
   setScheme(cached('rmm_scheme', 'google'));
+  /* Statistik (GoatCounter): kiraan tanpa nama sahaja. Emel, nama dan kandungan TIDAK dihantar. */
+  function track(path, title) {
+    var tries = 0;
+    (function go() {
+      try { if (window.goatcounter && window.goatcounter.count) { window.goatcounter.count({ path: 'readmymail/' + path, title: title, event: true }); return; } } catch (e) { return; }
+      if (++tries < 20) setTimeout(go, 500);
+    })();
+  }
+  window.addEventListener('appinstalled', function () { track('install', 'App dipasang'); });
+  try {
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+    if (standalone && !sessionStorage.getItem('rmm_tracked')) { sessionStorage.setItem('rmm_tracked', '1'); track('buka-app', 'Dibuka sebagai app (skrin utama)'); }
+  } catch (e) {}
   applyLang();
   window.addEventListener('load', function () { load(); });
   (function tick() {
