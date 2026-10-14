@@ -264,7 +264,7 @@
   function getTodayCount() {
     var day = new Date().toDateString(), q = todayQuery(), n = 0, pages = 0;
     function page(tok) {
-      return gfetch(GM + '/messages?maxResults=500&fields=messages/id,nextPageToken&q=' + encodeURIComponent(q) + (tok ? '&pageToken=' + tok : '')).then(function (r) {
+      return gfetch(GM + '/messages?maxResults=500&includeSpamTrash=true&fields=messages/id,nextPageToken&q=' + encodeURIComponent(q) + (tok ? '&pageToken=' + tok : '')).then(function (r) {
         n += ((r && r.messages) || []).length;
         if (r && r.nextPageToken && ++pages < 4) return page(r.nextPageToken);
       });
