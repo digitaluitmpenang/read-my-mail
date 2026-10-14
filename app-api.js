@@ -172,7 +172,7 @@
     });
     STATE.settings = {
       add: add, del: del, refresh: clamp(s.refresh, 30, 600, DEFAULTS.refresh), days: clamp(s.days, 1, 30, DEFAULTS.days), calDays: clamp(s.calDays, 1, 30, DEFAULTS.calDays),
-      scheme: ['uitm', 'penang', 'jalur'].indexOf(s.scheme) > -1 ? s.scheme : 'google', lang: s.lang === 'ms' ? 'ms' : 'en', theme: ['light', 'dark', 'system'].indexOf(s.theme) > -1 ? s.theme : 'system',
+      scheme: ['uitm', 'penang', 'jalur', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'black'].indexOf(s.scheme) > -1 ? s.scheme : 'google', lang: s.lang === 'ms' ? 'ms' : 'en', theme: ['light', 'dark', 'system'].indexOf(s.theme) > -1 ? s.theme : 'system',
       navPos: s.navPos === 'top' ? 'top' : 'side', replyPos: s.replyPos === 'bottom' ? 'bottom' : 'top', autoDemote: s.autoDemote === true || s.autoDemote === 'true'
     };
     persist();
