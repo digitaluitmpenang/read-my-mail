@@ -269,8 +269,9 @@
         if (r && r.nextPageToken && ++pages < 4) return page(r.nextPageToken);
       });
     }
-    return page('').then(function () { lsSet('rmm_today', { day: day, n: n }); return { n: n, q: q }; }, function () {
-      var c = lsGet('rmm_today'); return { n: c && c.day === day ? c.n : null, q: q };
+    return page('').then(function () { lsSet('rmm_today', { day: day, n: n }); return { n: n, q: q }; }, function (e) {
+      // Gagal: guna nilai tersimpan hari ini (jika ada) tetapi tandakan supaya pengguna tahu ia mungkin lapuk
+      var c = lsGet('rmm_today'); return { n: c && c.day === day ? c.n : null, q: q, stale: true, err: String((e && e.message) || e).substring(0, 160) };
     });
   }
   var PARTIAL = false;
@@ -416,7 +417,7 @@
         return Promise.all([getMe(), getEmails(cfg), getEvents(cfg), getTodayCount()]).then(function (r) {
           var me = r[0];
           r[2].forEach(function (e) { if (e.link) e.link += (e.link.indexOf('?') > -1 ? '&' : '?') + 'authuser=' + encodeURIComponent(me); });
-          return { me: me, settings: cfg, emails: r[1], events: r[2], todayCount: r[3].n, todayQ: r[3].q, updated: new Date().toISOString() };
+          return { me: me, settings: cfg, emails: r[1], events: r[2], todayCount: r[3].n, todayStale: !!r[3].stale, todayErr: r[3].err || '', todayQ: r[3].q, updated: new Date().toISOString() };
         });
       });
     },

@@ -400,7 +400,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261014d"></script>
+<script src="app-api.js?v=20261014f"></script>
 <script>
   var T = {
     ms: {
@@ -590,6 +590,7 @@
       .withSuccessHandler(function (d) {
         var firstLoad = !loadedOnce;
         DATA = d; loadedOnce = true; window.stopBusy(); render();
+        if (DATA.todayStale && !window._tsWarned) { window._tsWarned = true; toast((LANG === 'ms' ? 'Kiraan emel baru hari ini tak dapat dikemas kini: ' : 'Could not refresh today\'s new-mail count: ') + (DATA.todayErr || '?')); }
         if (firstLoad) restoreScroll();
         var part = RMM.partial; nextAt = Date.now() + (part ? 65000 : (((DATA.settings && DATA.settings.refresh) || 60) * 1000));
         if (part) $('upd').textContent = t('moreLoading');
@@ -1016,7 +1017,7 @@
       [actList().length, 'stAct', 'c1', '.s-act'],
       [impList().length, 'stImp', 'c2', '.s-imp'],
       [othList().filter(function (m) { return m.unread; }).length, 'stUnr', 'c3', '.s-oth'],
-      [DATA.todayCount != null ? DATA.todayCount : em.filter(function (m) { return new Date(m.date).toDateString() === td; }).length, 'stNew', 'c4', '.s-oth'],
+      [(DATA.todayCount != null ? DATA.todayCount : em.filter(function (m) { return new Date(m.date).toDateString() === td; }).length) + (DATA.todayStale ? '*' : ''), 'stNew', 'c4', '.s-oth'],
       [nToday, 'stToday', 'c5', '.s-today'],
       [nWeek, 'stWeek', 'c6', '.s-next']
     ];
