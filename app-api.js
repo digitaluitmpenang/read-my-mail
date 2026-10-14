@@ -256,10 +256,10 @@
              preview: c.body.replace(/\s+/g, ' ').substring(0, 220), action: action, done: false, important: important };
   }
 
-  // Bilangan emel diterima sejak 00:00 hari ini (Inbox, Arkib, Sampah; tanpa Spam/Sent/Draf/tab Promosi dll/label pengguna)
+  // Bilangan emel diterima sejak 00:00 hari ini (Inbox, Arkib, Sampah; semua tab; tanpa Spam/Sent/Draf/label pengguna)
   function todayQuery() {
     var s = new Date(); s.setHours(0, 0, 0, 0);
-    return 'after:' + Math.floor(s.getTime() / 1000) + ' in:anywhere -in:spam -in:sent -in:drafts -from:me -category:promotions -category:social -category:updates -category:forums has:nouserlabels';
+    return 'after:' + Math.floor(s.getTime() / 1000) + ' in:anywhere -in:spam -in:sent -in:drafts -from:me has:nouserlabels';
   }
   function getTodayCount() {
     var day = new Date().toDateString(), q = todayQuery(), n = 0, pages = 0;
