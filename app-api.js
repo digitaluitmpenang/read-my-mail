@@ -9,10 +9,12 @@
   var CFG = window.RMM_CONFIG || {};
   var SCOPES = ['https://www.googleapis.com/auth/gmail.modify',
                 'https://www.googleapis.com/auth/calendar.events',
+                'https://www.googleapis.com/auth/tasks',
                 'https://www.googleapis.com/auth/drive.appdata'].join(' ');
   var GM = 'https://gmail.googleapis.com/gmail/v1/users/me';
   var CAL = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
   var DRIVE = 'https://www.googleapis.com/drive/v3/files';
+  var TASKS = 'https://tasks.googleapis.com/tasks/v1/lists/@default/tasks';
   var LIMITS = { MAX_THREADS: 60, EMAIL_THRESHOLD: 3, EVENT_THRESHOLD: 2, DAYS_AHEAD: 3, KEEP_IDS: 300, CONC: 4, FETCH_BUDGET: 30 };
 
   var DEFAULTS = {
@@ -403,6 +405,37 @@
     });
   }
 
+
+  // ---------- Google Tasks (senarai utama sahaja; hanya yang ada tarikh akhir & belum selesai) ----------
+  // Tugas dipaparkan dalam senarai kalendar. Jika skop Tasks belum diberi / API belum diaktifkan, senarai kosong (app lain tak terganggu).
+  function getTasks(cfg) {
+    var s = new Date(); s.setHours(0, 0, 0, 0);
+    var cd = (cfg.calDays || 5), dow = (s.getDay() + 6) % 7, need = Math.max(cd + 1, 7 - dow);
+    var shownEnd = s.getTime() + (cd + 1) * 86400000;
+    var url = TASKS + '?showCompleted=false&showHidden=false&maxResults=100&dueMax=' + encodeURIComponent(new Date(s.getTime() + need * 86400000).toISOString());
+    return gfetch(url).then(function (r) {
+      var items = ((r && r.items) || []).filter(function (x) { return x.status === 'needsAction' && x.due; }).map(function (x) {
+        var ymd = String(x.due).substring(0, 10), d = new Date(ymd + 'T00:00:00'), late = d.getTime() < s.getTime(), st = late ? s : d;
+        return {
+          task: true, tid: x.id, id: 'task:' + x.id, title: x.title || '(tiada tajuk)', allDay: true, late: late, dueYmd: ymd,
+          start: st.toISOString(), end: new Date(st.getTime() + 86400000).toISOString(), extra: st.getTime() >= shownEnd,
+          location: '', descHtml: '', notes: String(x.notes || '').substring(0, 1000), join: '', guests: 0, creators: '', status: 'OWNER',
+          important: false, force: '', canRsvp: false, link: 'https://tasks.google.com/tasks/', guestList: []
+        };
+      });
+      return { items: items, auth: false };
+    }).catch(function (e) {
+      return { items: [], auth: /API 403/.test(e.message) && /insufficient|scope/i.test(e.message) };
+    });
+  }
+  function completeTask(tid) {
+    function go() { return gfetch(TASKS + '/' + encodeURIComponent(tid), { method: 'PATCH', headers: JSONH, body: JSON.stringify({ status: 'completed' }) }).then(function () { return true; }); }
+    return go().catch(function (e) {
+      if (/API 403/.test(e.message) && /insufficient|scope/i.test(e.message)) { tok = null; lsDel('rmm_tok'); return requestToken('consent').then(go); }
+      throw e;
+    });
+  }
+
   function getMe() {
     var m = lsGet('rmm_me'); if (m) return Promise.resolve(m);
     return gfetch(GM + '/profile').then(function (p) { lsSet('rmm_me', p.emailAddress); return p.emailAddress; });
@@ -413,10 +446,12 @@
     getDashboardData: function () {
       return loadState(true).then(function () {
         var cfg = getSettings();
-        return Promise.all([getMe(), getEmails(cfg), getEvents(cfg), getTodayCount()]).then(function (r) {
+        return Promise.all([getMe(), getEmails(cfg), getEvents(cfg), getTodayCount(), getTasks(cfg)]).then(function (r) {
           var me = r[0];
           r[2].forEach(function (e) { if (e.link) e.link += (e.link.indexOf('?') > -1 ? '&' : '?') + 'authuser=' + encodeURIComponent(me); });
-          return { me: me, settings: cfg, emails: r[1], events: r[2], todayCount: r[3].n, todayQ: r[3].q, updated: new Date().toISOString() };
+          var tk = r[4] || { items: [], auth: false };
+          r[2] = r[2].concat(tk.items).sort(function (x, y) { return (new Date(x.start) - new Date(y.start)) || ((x.task ? 1 : 0) - (y.task ? 1 : 0)); });
+          return { me: me, settings: cfg, emails: r[1], events: r[2], tasksAuth: tk.auth, todayCount: r[3].n, todayQ: r[3].q, updated: new Date().toISOString() };
         });
       });
     },
@@ -432,6 +467,8 @@
       });
     },
     rsvpEvent: function (id, resp) { return rsvpEvent(id, resp); },
+    completeTask: function (tid) { return completeTask(tid); },
+    grantTasks: function () { tok = null; lsDel('rmm_tok'); return requestToken('consent').then(function () { return true; }); },
     moveEvent: function (id, to) { return needState().then(function () { var a = to === 'imp' ? 'evUp' : 'evDown', b = to === 'imp' ? 'evDown' : 'evUp'; addMany(a, [id]); removeMany(b, [id]); persist(); return true; }); },
     markDone: function (id) { return needState().then(function () { addMany('dismissed', [id]); ['manual', 'pinned', 'done'].forEach(function (k) { removeMany(k, [id]); }); persist(); return true; }); },
     setActions: function (ids) { return needState().then(function () { addMany('manual', ids); ['done', 'dismissed', 'pinned'].forEach(function (k) { removeMany(k, ids); }); persist(); return true; }); },

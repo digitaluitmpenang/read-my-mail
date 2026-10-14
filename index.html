@@ -242,6 +242,7 @@
   .abtn { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
   .ev { padding:8px 10px; border-left:4px solid var(--blue); background:var(--evbg); border-radius:6px; margin-bottom:6px; cursor:pointer; }
   .ev.imp { border-left-color:var(--red); background:var(--evhot); } .ev.NO { border-left-color:var(--red); opacity:.75; } .ev.MAYBE { border-left-color:var(--yellow); }
+  .ev.tk { border-left-color:var(--yellow); } .ev.tk.late { border-left-color:var(--red); } .tkb { width:20px; height:20px; border-radius:50%; border:2px solid var(--blue); background:transparent; margin:0 8px -4px 0; padding:0; cursor:pointer; flex:none; } .tkb:active { background:var(--blue); }
   .ev.over { opacity:.65; } .evdone { font-size:12px; color:var(--green); font-weight:600; margin-top:2px; }
   .ev .t { font-weight:600; }
   .tag { font-size:11px; padding:1px 7px; border-radius:9px; color:#fff; margin-left:6px; }
@@ -400,7 +401,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261014d"></script>
+<script src="app-api.js?v=20261014e"></script>
 <script>
   var T = {
     ms: {
@@ -416,7 +417,7 @@
       from:"Dari", to:"Kepada", cc:"Cc", date:"Tarikh", msgs:"{n} mesej", loadMail:"Memuatkan emel…",
       allDay:"Sepanjang hari", time:"Masa", status:"Status anda", location:"Lokasi", guestsN:"{n} orang",
       stYES:"Diterima", stOWNER:"Anda", stNO:"Ditolak", stMAYBE:"Maybe", stINVITED:"Belum jawab",
-      evDone:"✔ Selesai", organizer:"Penganjur", join:"🎥 Sertai",
+      evDone:"✔ Selesai", tkTask:"Tugas", tkLate:"Lewat", tkDone:"Tandakan selesai", tkOk:"Tugas selesai ✓", tkOpen:"Buka Google Tasks", tkGrant:"Benarkan akses Google Tasks", tkDue:"Tarikh akhir", organizer:"Penganjur", join:"🎥 Sertai",
       lessTitle:"Jadikan kurang penting", lessThis:"Emel ini sahaja", lessThisD:"Pindah ke Emel Lain. Emel akan datang daripada pengirim ini masih boleh jadi penting.",
       lessSender:"Pengirim ini seterusnya", lessSenderD:"Semua emel akan datang daripada {a} terus ke Emel Lain.",
       toastDismiss:"Dipindah ke Emel Lain.", toastMuted:"Dipindah ke Emel Lain. Emel daripada {a} seterusnya kurang penting (urus di ⚙ Tetapan).",
@@ -450,7 +451,7 @@
       from:"From", to:"To", cc:"Cc", date:"Date", msgs:"{n} message(s)", loadMail:"Loading email…",
       allDay:"All day", time:"Time", status:"Your status", location:"Location", guestsN:"{n} people",
       stYES:"Accepted", stOWNER:"You", stNO:"Declined", stMAYBE:"Maybe", stINVITED:"No reply",
-      evDone:"✔ Done", organizer:"Organiser", join:"🎥 Join",
+      evDone:"✔ Done", tkTask:"Task", tkLate:"Overdue", tkDone:"Mark done", tkOk:"Task done ✓", tkOpen:"Open Google Tasks", tkGrant:"Allow Google Tasks access", tkDue:"Due", organizer:"Organiser", join:"🎥 Join",
       lessTitle:"Make less important", lessThis:"This email only", lessThisD:"Move to Other Mail. Future emails from this sender can still be important.",
       lessSender:"This sender from now on", lessSenderD:"All future emails from {a} go straight to Other Mail.",
       toastDismiss:"Moved to Other Mail.", toastMuted:"Moved to Other Mail. Future emails from {a} will be less important (manage in ⚙ Settings).",
@@ -494,7 +495,7 @@
   Object.assign(ICO, {'clock': '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 'pin': '<path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>', 'video': '<rect x="3" y="6" width="12" height="12" rx="2"/><path d="M15 10l6-3v10l-6-3"/>', 'users': '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 5a3.5 3.5 0 010 6.5M18 14c2.2.6 3.5 2.4 3.5 5"/>', 'user': '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>', 'doc': '<path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6"/>', 'checkc': '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>'});
   ICO.swap='<path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/>';
   ICO.help='<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1-1.5 2M12 17h.01"/>'; ICO.x='<path d="M6 6l12 12M18 6L6 18"/>';
-  ICO.reply='<path d="M10 8L4 13l6 5M4 13h9a7 7 0 017 7"/>'; ICO.replyall='<path d="M8 8L3 12l5 4M13 8L8 12l5 4M8 12h6a6 6 0 016 6"/>'; ICO.mail='<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'; ICO.cal='<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'; ICO.cloud='<path d="M7 18a4 4 0 010-8 5 5 0 019.6-1A4.5 4.5 0 0117 18z"/>'; ICO.spark='<path d="M12 3c.6 4.8 3.2 7.4 8 8-4.8.6-7.4 3.2-8 8-.6-4.8-3.2-7.4-8-8 4.8-.6 7.4-3.2 8-8z"/>';
+  ICO.reply='<path d="M10 8L4 13l6 5M4 13h9a7 7 0 017 7"/>'; ICO.replyall='<path d="M8 8L3 12l5 4M13 8L8 12l5 4M8 12h6a6 6 0 016 6"/>'; ICO.mail='<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'; ICO.cal='<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'; ICO.task='<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12.5l3 3 5-6"/>'; ICO.cloud='<path d="M7 18a4 4 0 010-8 5 5 0 019.6-1A4.5 4.5 0 0117 18z"/>'; ICO.spark='<path d="M12 3c.6 4.8 3.2 7.4 8 8-4.8.6-7.4 3.2-8 8-.6-4.8-3.2-7.4-8-8 4.8-.6 7.4-3.2 8-8z"/>';
   function ico(n) { return '<svg class="ico" viewBox="0 0 24 24">' + ICO[n] + '</svg>'; }
   function appMode() { return ANDROID && cached('rmm_open', 'app') !== 'web'; }
   function launcher(pkg, fb) { return 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=' + pkg + ';S.browser_fallback_url=' + encodeURIComponent(fb) + ';end'; }
@@ -830,6 +831,11 @@
   // ===== KALENDAR =====
   function dayIdx(e) { var s = new Date(e.start), n = new Date(); s.setHours(0,0,0,0); n.setHours(0,0,0,0); return Math.max(0, Math.round((s - n) / 864e5)); }
   function evHtml(e, i, showDate) {
+    if (e.task) {
+      var td = showDate ? new Date(e.start).toLocaleDateString(loc(), { weekday:'short', day:'numeric', month:'short' }) + ' · ' : '';
+      return '<div class="ev tk' + (e.late ? ' late' : '') + '" onclick="openEvent(' + i + ')"><div class="row"><span class="t ell"><button class="tkb" aria-label="' + esc(t('tkDone')) + '" onclick="event.stopPropagation();doneTask(' + i + ')"></button>' + esc(e.title) +
+        '</span><span class="when">' + td + (e.late ? t('tkLate') : t('tkTask')) + '</span></div></div>';
+    }
     var tm = e.allDay ? t('allDay') : fT(e.start) + ' – ' + fT(e.end);
     var d = showDate ? new Date(e.start).toLocaleDateString(loc(), { weekday:'short', day:'numeric', month:'short' }) + ' · ' : '';
     var over = new Date(e.end) < new Date();
@@ -839,6 +845,7 @@
       (over ? '<div class="evdone">' + t('evDone') + '</div>' : '') + '</div>';
   }
   function evSec(e) {
+    if (e.task) return dayIdx(e) === 0 ? 'A' : 'N';
     var other = e.status === 'NO' || e.status === 'MAYBE';
     if (e.force === 'oth') return 'O';
     if (e.force === 'imp') return dayIdx(e) === 0 ? 'A' : 'N';
@@ -867,7 +874,7 @@
       else if (sec === 'N') N += evHtml(e, i, true);
       else O += evHtml(e, i, true);
     });
-    $('calToday').innerHTML = A || '<div class="empty">' + t('noToday') + '</div>';
+    $('calToday').innerHTML = (DATA.tasksAuth ? '<div class="empty"><button class="btn lb" onclick="grantTasks()">' + ico('task') + t('tkGrant') + '</button></div>' : '') + (A || '<div class="empty">' + t('noToday') + '</div>');
     $('calNext').innerHTML = N || '<div class="empty">' + t('noNext') + '</div>';
     $('calOther').innerHTML = O || '<div class="empty">' + t('none') + '</div>';
     $('today').textContent = new Date().toLocaleDateString(loc(), { weekday:'short', day:'numeric', month:'short' });
@@ -882,8 +889,27 @@
     return s0.toLocaleDateString(loc(), o) + ', ' + fT(e.start) + ' –<br>' + en.toLocaleDateString(loc(), o) + ', ' + fT(e.end);
   }
   function urlOf(x) { var m = String(x || '').match(/https?:\/\/[^\s"'<>]+/); return m ? m[0] : ''; }
+  function doneTask(i) {
+    var e = DATA.events[i]; if (!e || !e.task) return;
+    RMM.run.withSuccessHandler(function () {
+      var k = DATA.events.indexOf(e); if (k > -1) DATA.events.splice(k, 1);
+      closeM(); renderCal(); renderStats(); toast(t('tkOk'));
+    }).withFailureHandler(function (er) { closeM(); fail(er); }).completeTask(e.tid);
+  }
+  function grantTasks() {
+    RMM.run.withSuccessHandler(function () { load(); }).withFailureHandler(fail).grantTasks();
+  }
+  function openTask(i) {
+    var e = DATA.events[i], due = new Date(e.dueYmd + 'T00:00:00').toLocaleDateString(loc(), { weekday:'long', day:'numeric', month:'long' });
+    showM('<div class="evh"><span class="dot" style="background:var(--yellow)"></span><h3>' + esc(e.title) + '</h3></div>' +
+      '<div class="evr"><span class="ic">' + ico('clock') + '</span><div><span class="sub">' + t('tkDue') + '</span><br>' + due + (e.late ? ' <span class="tag NO" style="margin:0">' + t('tkLate') + '</span>' : '') + '</div></div>' +
+      (e.notes ? '<div class="evr"><span class="ic">' + ico('doc') + '</span><div style="white-space:pre-wrap">' + esc(e.notes) + '</div></div>' : '') +
+      '<div class="actions"><button class="btn gr" onclick="doneTask(' + i + ')">' + ico('check') + t('tkDone') + '</button>' +
+      '<a class="btn lb" href="' + esc(e.link + '?authuser=' + encodeURIComponent(DATA.me)) + '" target="_blank">' + ico('task') + t('tkOpen') + '</a><button class="btn ghost" onclick="closeM()">' + t('close') + '</button></div>');
+  }
   function openEvent(i) {
     var e = DATA.events[i];
+    if (e.task) return openTask(i);
     var join = e.join || [e.location, e.descHtml].map(urlOf).filter(function (u) { return /meet\.google\.com|zoom\.us|teams\.microsoft\.com|webex\.com/.test(u); })[0] || '';
     var locU = urlOf(e.location);
     var locH = e.location ? '<div class="evr"><span class="ic">' + ico('pin') + '</span><div><a class="lnk" target="_blank" href="' + esc(locU || 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(e.location)) + '">' + esc(e.location) + '</a></div></div>' : '';
@@ -991,6 +1017,7 @@
     var items = [
       [ico('mail'), 'GMAIL',    g + 'inbox',  'mail.google.com',     '/mail/',     'com.google.android.gm', 1],
       [ico('cal'), 'CALENDAR', 'https://calendar.google.com/calendar/r?authuser=' + me, 'calendar.google.com', '/calendar/', 'com.google.android.calendar'],
+      [ico('task'), 'TASKS',    'https://tasks.google.com/tasks/?authuser=' + me, 'tasks.google.com', '/tasks/', 'com.google.android.apps.tasks', 1],
       [ico('cloud'), 'DRIVE',    'https://drive.google.com/drive/my-drive?authuser=' + me, 'drive.google.com', '/drive/', 'com.google.android.apps.docs'],
       [ico('spark'), 'GEMINI',   'https://gemini.google.com/app?authuser=' + me, 'gemini.google.com', '/app', null]
     ];
@@ -1009,7 +1036,7 @@
   function renderStats() {
     var now = new Date(), td = now.toDateString(), s0 = new Date(now); s0.setHours(0, 0, 0, 0);
     var dow = (now.getDay() + 6) % 7, wkEnd = s0.getTime() + (7 - dow) * 86400000;
-    var em = DATA.emails || [], ev = (DATA.events || []).filter(function (e) { return e.status !== 'NO'; });
+    var em = DATA.emails || [], ev = (DATA.events || []).filter(function (e) { return e.status !== 'NO' && !e.task; });
     var nToday = ev.filter(function (e) { return new Date(e.start).getTime() < s0.getTime() + 86400000 && new Date(e.end).getTime() > s0.getTime(); }).length;
     var nWeek = ev.filter(function (e) { return new Date(e.start).getTime() < wkEnd && new Date(e.end).getTime() > s0.getTime(); }).length;
     var items = [
