@@ -352,6 +352,7 @@
       <div class="foot"><span class="cnt" id="acnt"></span>
         <span class="fbtns two">
           <button class="ibtn ok" id="aDone" onclick="doneCurA()" data-tip="tipDone"><span class="ib"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span data-i="lblDone"></span></button>
+          <button class="ibtn yl" id="aLess" onclick="lessCurA()" data-tip="tipLess"><span class="ib"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span><span data-i="lblLess"></span></button>
           <button class="ibtn del" id="aDel" onclick="delCurA()" data-tip="tipDel"><span class="ib"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></span><span data-i="lblDel"></span></button>
         </span></div>
     </section>
@@ -403,7 +404,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261014j"></script>
+<script src="app-api.js?v=20261018a"></script>
 <script>
   var T = {
     ms: {
@@ -623,7 +624,7 @@
     if (actIdx < 0) actIdx = 0;
     $('nAct').textContent = L.length;
     $('aprev').disabled = actIdx <= 0; $('anext').disabled = actIdx >= L.length - 1;
-    $('aDone').style.display = $('aDel').style.display = L.length ? '' : 'none';
+    $('aDone').style.display = $('aDel').style.display = $('aLess').style.display = L.length ? '' : 'none';
     if (!L.length) { $('acard').innerHTML = '<div class="empty">' + t('noAct') + '</div>'; $('acnt').textContent = ''; return; }
     $('acard').innerHTML = cardHtml(L[actIdx]);
     $('acnt').textContent = (actIdx + 1) + ' / ' + L.length;
@@ -631,6 +632,7 @@
   function curIdA() { var L = actList(); return L.length ? L[actIdx].id : null; }
   function openCurA() { var id = curIdA(); if (id) openMail(id, 'act'); }
   function doneCurA() { var id = curIdA(); if (id) doneMail(id); }
+  function lessCurA() { var id = curIdA(); if (id) lessDlg(id); }
   function delCurA() { var id = curIdA(); if (id) confirmDel([id]); }
 
   function step(d) { impIdx += d; renderImp(); }
@@ -707,7 +709,7 @@
   }
   function dismissOne(id) {
     RMM.run.withSuccessHandler(function () {
-      var m = find(id); if (m) { m.important = false; m.done = false; }
+      var m = find(id); if (m) { m.important = false; m.action = false; m.done = false; }
       closeM(); render(); toast(t('toastDismiss'));
     }).withFailureHandler(fail).dismissThread(id);
   }
@@ -715,7 +717,7 @@
     var m = find(id); if (!m) return; var a = senderAddr(m.from);
     RMM.run.withSuccessHandler(function (st) {
       DATA.settings = st;
-      DATA.emails.forEach(function (x) { if (senderAddr(x.from) === a && !x.done) x.important = false; });
+      DATA.emails.forEach(function (x) { if (senderAddr(x.from) === a && !x.done) { x.important = false; x.action = false; } });
       closeM(); render(); toast(t('toastMuted', { a: a }));
     }).withFailureHandler(fail).muteSender(m.from);
   }
@@ -792,22 +794,24 @@
       return doc.body.innerHTML;
     } catch (e) { return h; }
   }
+  // Emel (cth. jemputan Google Calendar) ada CSS mod gelap sendiri -> teks cerah atas latar putih kita. Matikan, paksa paparan cerah.
+  function lightOnly(h) { return String(h || '').replace(/prefers-color-scheme\s*:\s*dark/gi, 'prefers-color-scheme:none').replace(/<meta[^>]+name=["']?color-scheme[^>]*>/gi, ''); }
   function threadDoc(d) {
     var th = d.thread || [];
     if (th.length < 2) return mailDoc(d);
-    var out = '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124}img{max-width:100%;height:auto}.mh{font-size:12px;color:#5f6368;border-bottom:1px solid #dadce0;padding:4px 0;margin:0 0 8px}.mh b{color:#202124;font-size:13px}.mm{margin-bottom:22px}</style>';
+    var out = '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124;color-scheme:light}img{max-width:100%;height:auto}.mh{font-size:12px;color:#5f6368;border-bottom:1px solid #dadce0;padding:4px 0;margin:0 0 8px}.mh b{color:#202124;font-size:13px}.mm{margin-bottom:22px}</style>';
     if (d.hidden > 0) out += '<div class="mh">… ' + d.hidden + ' ' + (LANG === 'ms' ? 'mesej lebih awal tidak dipaparkan' : 'earlier message(s) not shown') + '</div>';
     th.forEach(function (m, i) {
       var body;
-      if (m.html) { body = i === 0 ? m.html : stripQuote(m.html); if (i && !body.replace(/<[^>]*>|&nbsp;|\s/g, '')) body = m.html; }
+      if (m.html) { body = lightOnly(i === 0 ? m.html : stripQuote(m.html)); if (i && !body.replace(/<[^>]*>|&nbsp;|\s/g, '')) body = lightOnly(m.html); }
       else { var tx = i === 0 ? m.text : m.text.split(/\n+\s*(?:On .{5,120}wrote:|-{2,}\s*Original Message|From:\s.+\nSent:)/i)[0]; body = '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">' + esc(tx || m.text) + '</pre>'; }
       out += '<div class="mm"><div class="mh"><b>' + esc(m.from) + '</b> · ' + esc(new Date(m.date).toLocaleString(loc())) + '</div>' + body + '</div>';
     });
     return out;
   }
   function mailDoc(d) {
-    var inner = d.html || '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">' + esc(d.body) + '</pre>';
-    return '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124}img{max-width:100%;height:auto}</style>' + inner;
+    var inner = lightOnly(d.html) || '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">' + esc(d.body) + '</pre>';
+    return '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124;color-scheme:light}img{max-width:100%;height:auto}</style>' + inner;
   }
   function openMail(id, mode) {
     showM('<div class="meta">' + t('loadMail') + '</div>');
@@ -820,7 +824,7 @@
         b += B('yl', 'reply', L('reply'), { href: compose(d.replyTo, '', d.subject, quoteOf(d)) }) +
              B('yl', 'replyall', L('replyAll'), { href: compose(d.replyAllTo, d.replyAllCc, d.subject, quoteOf(d)) });
       }
-      if (mode === 'act') b += B('gr', 'check', L('done'), { on: "doneMail('" + id + "')" });
+      if (mode === 'act') b += B('gr', 'check', L('done'), { on: "doneMail('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else if (mode === 'imp') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'star', L('markImp'), { on: "bulkOne('" + id + "')" });
       b += B('pk', 'trash', L('delRow'), { on: "confirmDel(['" + id + "'])" }) + '<button class="btn ghost" onclick="closeM()">' + t('close') + '</button>';

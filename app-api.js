@@ -235,6 +235,13 @@
     return has(s + ' ' + b.substring(0, 1500), cfg.actionWords);
   }
 
+  // Jemputan mesyuarat (ikut 'meetingWords' dalam tetapan) terus ke Penting; balasan Accepted/Declined tidak dikira
+  function isInvite(subject, body, cfg) {
+    var s = subject.toLowerCase();
+    if (/^\s*(tentatively accepted|accepted|declined|diterima|ditolak)\b/.test(s)) return false;
+    return has(s + ' ' + body.toLowerCase().substring(0, 160), cfg.meetingWords);
+  }
+
   function buildEmail(c, cfg) {
     var done = listOf('done'), manual = listOf('manual'), dismissed = listOf('dismissed'), pinned = listOf('pinned');
     var hay = (c.subject + ' ' + c.from).toLowerCase(), muted = has(c.from.toLowerCase(), cfg.muted), score = 0;
@@ -252,7 +259,7 @@
     if (!action) {
       if (isPinned) important = true;
       else if (isDism) important = false;
-      else { important = score >= LIMITS.EMAIL_THRESHOLD; if (important && cfg.autoDemote && !c.unread) important = false; }
+      else { important = score >= LIMITS.EMAIL_THRESHOLD || (!muted && isInvite(c.subject, c.body, cfg)); if (important && cfg.autoDemote && !c.unread) important = false; }
     }
     return { id: id, subject: c.subject, from: c.from, date: c.date, unread: c.unread, starred: c.starred,
              preview: c.body.replace(/\s+/g, ' ').substring(0, 220), action: action, done: false, important: important };
