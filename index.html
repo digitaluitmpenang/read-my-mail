@@ -245,6 +245,9 @@
   .ev { padding:8px 10px; border-left:4px solid var(--blue); background:var(--evbg); border-radius:6px; margin-bottom:6px; cursor:pointer; }
   .ev.imp { border-left-color:var(--red); background:var(--evhot); } .ev.NO { border-left-color:var(--red); opacity:.75; } .ev.MAYBE { border-left-color:var(--yellow); }
   .ev.tk { border-left-color:var(--yellow); } .ev.tk.late { border-left-color:var(--red); } .tkb { width:20px; height:20px; border-radius:50%; border:2px solid var(--blue); background:transparent; margin:0 8px -4px 0; padding:0; cursor:pointer; flex:none; } .tkb:active { background:var(--blue); }
+  .ev.clash { border-left-color:#E8710A; background:#fff4e8; } .clashln { font-size:12px; font-weight:700; color:#B45309; margin-top:2px; } .clashbx { margin:8px 0 10px; padding:8px 10px; border-radius:8px; background:#fff4e8; color:#8a3d00; font-size:13px; border-left:4px solid #E8710A; }
+  :root[data-theme=dark] .ev.clash { background:#3d2a18; } :root[data-theme=dark] .clashln { color:#F5A25D; } :root[data-theme=dark] .clashbx { background:#3d2a18; color:#f6c9a0; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme=light]):not([data-theme=dark]) .ev.clash { background:#3d2a18; } :root:not([data-theme=light]):not([data-theme=dark]) .clashln { color:#F5A25D; } :root:not([data-theme=light]):not([data-theme=dark]) .clashbx { background:#3d2a18; color:#f6c9a0; } }
   .ev.over { opacity:.65; } .evdone { font-size:12px; color:var(--green); font-weight:600; margin-top:2px; }
   .ev .t { font-weight:600; }
   .tag { font-size:11px; padding:1px 7px; border-radius:9px; color:#fff; margin-left:6px; }
@@ -350,7 +353,7 @@
         <button class="arr" id="anext" onclick="stepA(1)">›</button>
       </div>
       <div class="foot"><span class="cnt" id="acnt"></span>
-        <span class="fbtns two">
+        <span class="fbtns">
           <button class="ibtn ok" id="aDone" onclick="doneCurA()" data-tip="tipDone"><span class="ib"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span data-i="lblDone"></span></button>
           <button class="ibtn yl" id="aLess" onclick="lessCurA()" data-tip="tipLess"><span class="ib"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span><span data-i="lblLess"></span></button>
           <button class="ibtn del" id="aDel" onclick="delCurA()" data-tip="tipDel"><span class="ib"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></span><span data-i="lblDel"></span></button>
@@ -420,7 +423,7 @@
       from:"Dari", to:"Kepada", cc:"Cc", date:"Tarikh", msgs:"{n} mesej", loadMail:"Memuatkan emel…",
       allDay:"Sepanjang hari", time:"Masa", status:"Status anda", location:"Lokasi", guestsN:"{n} orang",
       stYES:"Diterima", stOWNER:"Anda", stNO:"Ditolak", stMAYBE:"Maybe", stINVITED:"Belum jawab",
-      evDone:"✔ Selesai", tkTask:"Tugas", tkLate:"Lewat", tkDone:"Tandakan selesai", tkOk:"Tugas selesai ✓", tkOpen:"Buka Google Tasks", tkGrant:"Benarkan akses Google Tasks", tkDue:"Tarikh akhir", organizer:"Penganjur", join:"🎥 Sertai",
+      evDone:"✔ Selesai", clashWith:"Bertindih dengan", clashMore:"+{n} lagi", clashTitle:"Masa bertindih dengan:", tkTask:"Tugas", tkLate:"Lewat", tkDone:"Tandakan selesai", tkOk:"Tugas selesai ✓", tkOpen:"Buka Google Tasks", tkGrant:"Benarkan akses Google Tasks", tkDue:"Tarikh akhir", organizer:"Penganjur", join:"🎥 Sertai",
       lessTitle:"Jadikan kurang penting", lessThis:"Emel ini sahaja", lessThisD:"Pindah ke Emel Lain. Emel akan datang daripada pengirim ini masih boleh jadi penting.",
       lessSender:"Pengirim ini seterusnya", lessSenderD:"Semua emel akan datang daripada {a} terus ke Emel Lain.",
       toastDismiss:"Dipindah ke Emel Lain.", toastMuted:"Dipindah ke Emel Lain. Emel daripada {a} seterusnya kurang penting (urus di ⚙ Tetapan).",
@@ -454,7 +457,7 @@
       from:"From", to:"To", cc:"Cc", date:"Date", msgs:"{n} message(s)", loadMail:"Loading email…",
       allDay:"All day", time:"Time", status:"Your status", location:"Location", guestsN:"{n} people",
       stYES:"Accepted", stOWNER:"You", stNO:"Declined", stMAYBE:"Maybe", stINVITED:"No reply",
-      evDone:"✔ Done", tkTask:"Task", tkLate:"Overdue", tkDone:"Mark done", tkOk:"Task done ✓", tkOpen:"Open Google Tasks", tkGrant:"Allow Google Tasks access", tkDue:"Due", organizer:"Organiser", join:"🎥 Join",
+      evDone:"✔ Done", clashWith:"Clashes with", clashMore:"+{n} more", clashTitle:"Overlaps with:", tkTask:"Task", tkLate:"Overdue", tkDone:"Mark done", tkOk:"Task done ✓", tkOpen:"Open Google Tasks", tkGrant:"Allow Google Tasks access", tkDue:"Due", organizer:"Organiser", join:"🎥 Join",
       lessTitle:"Make less important", lessThis:"This email only", lessThisD:"Move to Other Mail. Future emails from this sender can still be important.",
       lessSender:"This sender from now on", lessSenderD:"All future emails from {a} go straight to Other Mail.",
       toastDismiss:"Moved to Other Mail.", toastMuted:"Moved to Other Mail. Future emails from {a} will be less important (manage in ⚙ Settings).",
@@ -837,6 +840,26 @@
 
   // ===== KALENDAR =====
   function dayIdx(e) { var s = new Date(e.start), n = new Date(); s.setHours(0,0,0,0); n.setHours(0,0,0,0); return Math.max(0, Math.round((s - n) / 864e5)); }
+  // Acara yang masa bertindih (bukan sepanjang hari, bukan tugas, bukan yang ditolak)
+  function clashOf(e) {
+    if (e.task || e.allDay || e.status === 'NO') return [];
+    var s = new Date(e.start).getTime(), en = new Date(e.end).getTime(), now = Date.now();
+    if (en < now) return [];   // acara yang sudah tamat tidak ditanda
+    return (DATA.events || []).filter(function (o) {
+      return o !== e && !o.task && !o.allDay && o.status !== 'NO' && new Date(o.end).getTime() >= now && new Date(o.start).getTime() < en && new Date(o.end).getTime() > s;
+    });
+  }
+  function clashBox(e) {
+    var c = clashOf(e); if (!c.length) return '';
+    return '<div class="clashbx"><b>⚠ ' + t('clashTitle') + '</b>' + c.map(function (o) {
+      return '<div>' + esc(o.title) + ' <span class="sub">' + fT(o.start) + ' – ' + fT(o.end) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function clashLine(e) {
+    var c = clashOf(e); if (!c.length) return '';
+    var o = c[0], when = fT(o.start) + ' – ' + fT(o.end);
+    return '<div class="clashln">⚠ ' + t('clashWith') + ' ' + esc(o.title) + ' (' + when + ')' + (c.length > 1 ? ' ' + t('clashMore', { n: c.length - 1 }) : '') + '</div>';
+  }
   function evHtml(e, i, showDate) {
     if (e.task) {
       var td = showDate ? new Date(e.start).toLocaleDateString(loc(), { weekday:'short', day:'numeric', month:'short' }) + ' · ' : '';
@@ -846,9 +869,10 @@
     var tm = e.allDay ? t('allDay') : fT(e.start) + ' – ' + fT(e.end);
     var d = showDate ? new Date(e.start).toLocaleDateString(loc(), { weekday:'short', day:'numeric', month:'short' }) + ' · ' : '';
     var over = new Date(e.end) < new Date();
-    return '<div class="ev ' + (e.important ? 'imp ' : '') + (over ? 'over ' : '') + e.status + '" onclick="openEvent(' + i + ')"><div class="row"><span class="t ell">' + esc(e.title) +
+    var cln = clashLine(e);
+    return '<div class="ev ' + (e.important ? 'imp ' : '') + (over ? 'over ' : '') + (cln ? 'clash ' : '') + e.status + '" onclick="openEvent(' + i + ')"><div class="row"><span class="t ell">' + esc(e.title) +
       '<span class="tag ' + e.status + '">' + t('st' + e.status) + '</span></span><span class="when">' + d + tm + '</span></div>' +
-      (e.location ? '<div class="when ell">📍 ' + esc(e.location) + '</div>' : '') +
+      (e.location ? '<div class="when ell">📍 ' + esc(e.location) + '</div>' : '') + cln +
       (over ? '<div class="evdone">' + t('evDone') + '</div>' : '') + '</div>';
   }
   function evSec(e) {
@@ -926,7 +950,7 @@
     var plain = (e.descHtml || '').replace(/<[^>]*>|&nbsp;/g, '').trim();
     var descH = plain ? '<div class="evr"><span class="ic">' + ico('doc') + '</span><iframe class="mframe" style="height:' + Math.min(320, 70 + Math.ceil(plain.length / 70) * 20) + 'px;margin:0" sandbox="allow-popups allow-popups-to-escape-sandbox" srcdoc="' + attr(mailDoc({ html: e.descHtml, body: '' })) + '"></iframe></div>' : '';
     showM('<div class="evh"><span class="dot" style="background:' + (e.important ? 'var(--red)' : 'var(--blue)') + '"></span><h3>' + esc(e.title) + '</h3></div>' +
-      '<div class="evr"><span class="ic">' + ico('clock') + '</span><div>' + evWhen(e) + '</div></div>' +
+      '<div class="evr"><span class="ic">' + ico('clock') + '</span><div>' + evWhen(e) + '</div></div>' + clashBox(e) +
       (join ? '<div class="evr"><span class="ic">' + ico('video') + '</span><div><a class="btn gr" target="_blank" href="' + esc(join) + '">' + ico('video') + t('join').replace(/^[^A-Za-z]+/, '') + '</a></div></div>' : '') +
       locH +
       (guests ? '<div class="evr"><span class="ic">' + ico('users') + '</span><div><b>' + t('guestsN', { n: e.guestList.length }) + '</b>' + guests + '</div></div>' : '') +
