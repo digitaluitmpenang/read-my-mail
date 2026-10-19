@@ -408,7 +408,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261019f"></script>
+<script src="app-api.js?v=20261019g"></script>
 <script>
   var T = {
     ms: {
@@ -823,7 +823,8 @@
       var body;
       if (m.html) { body = lightOnly(i === 0 ? m.html : stripQuote(m.html)); if (i && !body.replace(/<[^>]*>|&nbsp;|\s/g, '')) body = lightOnly(m.html); }
       else { var tx = i === 0 ? m.text : m.text.split(/\n+\s*(?:On .{5,120}wrote:|-{2,}\s*Original Message|From:\s.+\nSent:)/i)[0]; body = '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">' + esc(tx || m.text) + '</pre>'; }
-      out += '<div class="mm"><div class="mh"><b>' + esc(m.from) + '</b> · ' + esc(new Date(m.date).toLocaleString(loc())) + '</div>' + body + '</div>';
+      out += '<div class="mm"><div class="mh"><b>' + esc(m.from) + '</b> · ' + esc(new Date(m.date).toLocaleString(loc())) +
+        (m.to ? '<br>' + (LANG === 'ms' ? 'Kepada' : 'To') + ': ' + esc(m.to) : '') + (m.cc ? '<br>Cc: ' + esc(m.cc) : '') + '</div>' + body + '</div>';
     });
     return out;
   }

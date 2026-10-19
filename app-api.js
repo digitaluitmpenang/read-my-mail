@@ -343,7 +343,7 @@
       var thread = Promise.all(shown.map(function (m) {
         var p = findPart(m.payload, 'text/html'), h = p ? cleanHtml(b64(p.body.data)) : '';
         return inlineCids(m, h).then(function (h3) {
-          return { id: m.id, from: hdr(m, 'from'), to: hdr(m, 'to'), date: new Date(Number(m.internalDate)).toISOString(), html: h3, text: bodyText(m.payload).substring(0, 4000) };
+          return { id: m.id, from: hdr(m, 'from'), to: hdr(m, 'to'), cc: hdr(m, 'cc'), date: new Date(Number(m.internalDate)).toISOString(), html: h3, text: bodyText(m.payload).substring(0, 4000) };
         });
       }));
       return Promise.all([inlineCids(last, html), thread]).then(function (rs) {
