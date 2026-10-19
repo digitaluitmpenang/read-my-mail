@@ -402,13 +402,13 @@
 </div>
 
 <div id="loader"><div class="spin"></div><div id="loaderTxt"></div></div>
-<div id="auth"><div class="authbox"><h2 id="authTitle">Read My Mail</h2><p id="authMsg"></p><button class="btn" id="authBtn" onclick="RMM.signIn()"></button></div></div>
+<div id="auth" onclick="RMM.signIn()"><div class="authbox"><h2 id="authTitle">Read My Mail</h2><p id="authMsg"></p><button class="btn" id="authBtn" onclick="RMM.signIn()"></button></div></div>
 <div id="toast"></div>
 <div id="ov" onclick="if(event.target===this)closeM()"><div id="modal"></div></div>
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261019g"></script>
+<script src="app-api.js?v=20261019h"></script>
 <script>
   var T = {
     ms: {

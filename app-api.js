@@ -70,8 +70,22 @@
     return pendingTok;
   }
   // Tanpa token sah -> minta pengguna log masuk (buka tetingkap Google tanpa sentuhan akan disekat browser)
+  // Pernah log masuk (ada hint): cuba perbaharui token secara senyap tanpa papar skrin log masuk.
+  // Jika browser menyekat tetingkap, jatuh ke skrin log masuk (satu ketikan di mana-mana).
+  var lastSilent = 0, silentP = null;
   function ensureToken() {
-    return tokenValid() ? Promise.resolve(tok.t) : Promise.reject(authErr('AUTH'));
+    if (tokenValid()) return Promise.resolve(tok.t);
+    if (!lsGet('rmm_me')) return Promise.reject(authErr('AUTH'));
+    if (silentP && Date.now() - lastSilent < 20000) return silentP;
+    lastSilent = Date.now();
+    var tries = 0;
+    return silentP = new Promise(function (res, rej) {
+      (function wait() {
+        if (initClient()) return requestToken('').then(res, function () { rej(authErr('AUTH')); });
+        if (++tries > 30) return rej(authErr('AUTH'));
+        setTimeout(wait, 100);
+      })();
+    });
   }
   // Token Google tamat selepas ~1 jam. Perbaharui secara senyap bila pengguna menyentuh skrin (gerak isyarat dibenarkan buka tetingkap).
   document.addEventListener('click', function () {
