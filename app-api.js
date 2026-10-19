@@ -30,7 +30,7 @@
                   'for your action', 'kindly send', 'kindly submit', 'due by'],
     meetingWords: ['invitation:', 'updated invitation', 'jemputan', 'panggilan mesyuarat', 'mesyuarat',
                    'meeting', 'google meet', 'zoom', 'teams meeting'],
-    refresh: 60, days: 7, calDays: 5, scheme: 'google', lang: 'en', theme: 'system', navPos: 'side', replyPos: 'top', autoDemote: false
+    refresh: 60, days: 7, calDays: 5, scheme: 'google', lang: 'en', theme: 'system', navPos: 'side', replyPos: 'top', replyMode: 'compose', autoDemote: false
   };
   var LIST_KEYS = ['vip', 'muted', 'keywords', 'eventKeywords', 'actionWords', 'meetingWords'];
 
@@ -160,7 +160,7 @@
       var dl = del[k] || [];
       out[k] = base.filter(function (x) { return dl.indexOf(x) < 0; });
     });
-    ['refresh', 'days', 'calDays', 'scheme', 'lang', 'theme', 'navPos', 'replyPos', 'autoDemote'].forEach(function (k) { if (saved[k] !== undefined) out[k] = saved[k]; });
+    ['refresh', 'days', 'calDays', 'scheme', 'lang', 'theme', 'navPos', 'replyPos', 'replyMode', 'autoDemote'].forEach(function (k) { if (saved[k] !== undefined) out[k] = saved[k]; });
     return out;
   }
   function saveSettings(s) {
@@ -175,7 +175,7 @@
     STATE.settings = {
       add: add, del: del, refresh: clamp(s.refresh, 30, 600, DEFAULTS.refresh), days: clamp(s.days, 1, 30, DEFAULTS.days), calDays: clamp(s.calDays, 1, 30, DEFAULTS.calDays),
       scheme: ['uitm', 'penang', 'jalur', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'black'].indexOf(s.scheme) > -1 ? s.scheme : 'google', lang: s.lang === 'ms' ? 'ms' : 'en', theme: ['light', 'dark', 'system'].indexOf(s.theme) > -1 ? s.theme : 'system',
-      navPos: s.navPos === 'top' ? 'top' : 'side', replyPos: s.replyPos === 'bottom' ? 'bottom' : 'top', autoDemote: s.autoDemote === true || s.autoDemote === 'true'
+      navPos: s.navPos === 'top' ? 'top' : 'side', replyPos: s.replyPos === 'bottom' ? 'bottom' : 'top', replyMode: s.replyMode === 'gmail' ? 'gmail' : 'compose', autoDemote: s.autoDemote === true || s.autoDemote === 'true'
     };
     persist();
     return getSettings();

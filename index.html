@@ -408,7 +408,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261019d"></script>
+<script src="app-api.js?v=20261019e"></script>
 <script>
   var T = {
     ms: {
@@ -435,7 +435,7 @@
       fEv:"Kata kunci acara penting", fMute:"Pengirim KURANG PENTING (alamat atau domain, cth: otter.ai)",
       fAct:"Frasa PERLU TINDAKAN (cth: sila hantar, action required)", fMeet:"Frasa panggilan mesyuarat (DIABAIKAN daripada tindakan)",
       fScheme:"Tema warna", schGoogle:"Google", schUitm:"UiTM", schJalur:"Jalur Gemilang", schPenang:"Pulau Pinang", fRef:"Refresh automatik (saat, 30–600)", fDays:"Imbas emel inbox (hari, 1–30)", fCal:"Kalendar akan datang (hari, 1–30)", fLang:"Bahasa", fTheme:"Paparan warna",
-      thLight:"Cerah", thDark:"Gelap", thSys:"Ikut sistem", fReplyPos:"Kedudukan balasan (Reply)", rpTop:"Atas emel asal (biasa)", rpBot:"Bawah emel asal", fNavPos:"Butang pintasan (PC)", navSide:"Tepi (menegak)", navTop:"Atas (mendatar)",
+      thLight:"Cerah", thDark:"Gelap", thSys:"Ikut sistem", fReplyMode:"Bila tekan Balas / Teruskan", rmCompose:"Buka tetingkap tulis emel (biasa)", rmGmail:"Buka emel itu terus dalam Gmail, saya tekan Balas sendiri", fReplyPos:"Kedudukan balasan (Reply)", rpTop:"Atas emel asal (biasa)", rpBot:"Bawah emel asal", fNavPos:"Butang pintasan (PC)", navSide:"Tepi (menegak)", navTop:"Atas (mendatar)",
       fAuto:"Emel penting yang sudah dibaca", autoKeep:"Kekal di Emel Penting", autoMove:"Pindah ke Emel Lain",
       resetLists:"↺ Pulihkan senarai lalai",
       lblImp:"Penting", tipImp:"Naikkan ke Emel Penting",
@@ -469,7 +469,7 @@
       fEv:"Important-event keywords", fMute:"LESS IMPORTANT senders (address or domain, e.g. otter.ai)",
       fAct:"NEEDS-ACTION phrases (e.g. please send, action required)", fMeet:"Meeting-call phrases (IGNORED for actions)",
       fScheme:"Colour theme", schGoogle:"Google", schUitm:"UiTM", schJalur:"Jalur Gemilang", schPenang:"Penang", fRef:"Auto refresh (seconds, 30–600)", fDays:"Scan inbox (days, 1–30)", fCal:"Upcoming calendar (days, 1–30)", fLang:"Language", fTheme:"Colour mode",
-      thLight:"Light", thDark:"Dark", thSys:"Follow system", fReplyPos:"Reply position", rpTop:"Above original email (default)", rpBot:"Below original email", fNavPos:"Shortcut buttons (PC)", navSide:"Side (vertical)", navTop:"Top (horizontal)",
+      thLight:"Light", thDark:"Dark", thSys:"Follow system", fReplyMode:"When I tap Reply / Forward", rmCompose:"Open a compose window (default)", rmGmail:"Open that email in Gmail, I tap Reply myself", fReplyPos:"Reply position", rpTop:"Above original email (default)", rpBot:"Below original email", fNavPos:"Shortcut buttons (PC)", navSide:"Side (vertical)", navTop:"Top (horizontal)",
       fAuto:"Important mail you have already read", autoKeep:"Keep in Important Mail", autoMove:"Move to Other Mail",
       resetLists:"↺ Restore default lists",
       lblImp:"Important", tipImp:"Move up to Important Mail",
@@ -838,10 +838,11 @@
       var L = function (k) { return t(k).replace(/^[^A-Za-z]+/, ''); };
       var B = function (cls, ic, lab, extra) { return '<' + (extra.href ? 'a' : 'button') + ' class="btn ' + cls + '" ' + (extra.href ? 'href="' + esc(extra.href) + '" target="' + tgt() + '"' : 'onclick="' + extra.on + '"') + '>' + ico(ic) + lab + '</' + (extra.href ? 'a' : 'button') + '>'; };
       var b = B('lb', 'mail', L('openGmail'), { href: gmailLink(id) });
-      b += B('yl', 'fwd', L('fwd'), { href: compose('', '', d.subject, fwdOf(d), true) });
+      var gm = (DATA.settings || {}).replyMode === 'gmail', gl = gmailLink(id);
+      b += B('yl', 'fwd', L('fwd'), { href: gm ? gl : compose('', '', d.subject, fwdOf(d), true) });
       if (mode !== 'oth') {
-        b += B('yl', 'reply', L('reply'), { href: compose(d.replyTo, '', d.subject, quoteOf(d)) }) +
-             B('yl', 'replyall', L('replyAll'), { href: compose(d.replyAllTo, d.replyAllCc, d.subject, quoteOf(d)) });
+        b += B('yl', 'reply', L('reply'), { href: gm ? gl : compose(d.replyTo, '', d.subject, quoteOf(d)) }) +
+             B('yl', 'replyall', L('replyAll'), { href: gm ? gl : compose(d.replyAllTo, d.replyAllCc, d.subject, quoteOf(d)) });
       }
       if (mode === 'act') b += B('gr', 'check', L('done'), { on: "doneMail('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else if (mode === 'imp') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
@@ -1021,6 +1022,7 @@
       '<label class="lbl">' + t('fLang') + '</label>' + radios('sLang', s.lang || 'en', [['ms', 'Bahasa Melayu'], ['en', 'English']]) +
       '<label class="lbl">' + t('fScheme') + '</label>' + schemePick(s.scheme || 'google') +
       '<label class="lbl">' + t('fTheme') + '</label>' + radios('sTheme', s.theme || 'system', [['system', t('thSys')], ['light', t('thLight')], ['dark', t('thDark')]]) +
+      '<label class="lbl">' + t('fReplyMode') + '</label>' + radios('sRM', s.replyMode || 'compose', [['compose', t('rmCompose')], ['gmail', t('rmGmail')]]) +
       '<label class="lbl">' + t('fReplyPos') + '</label>' + radios('sRP', s.replyPos || 'top', [['top', t('rpTop')], ['bottom', t('rpBot')]]) +
       '<label class="lbl">' + t('fNavPos') + '</label>' + radios('sNav', s.navPos || 'side', [['side', t('navSide')], ['top', t('navTop')]]) +
       (ANDROID ? '<label class="lbl">' + t('fOpen') + '</label>' + radios('sOpen', cached('rmm_open', 'app'), [['app', t('openApp')], ['web', t('openWeb')]]) : '') +
@@ -1040,7 +1042,7 @@
     saving = true;
     var L = function (id) { return $(id).value.split(/\n|,/).map(function (x) { return x.trim(); }).filter(Boolean); };
     var data = { vip:L('sVip'), keywords:L('sKw'), muted:L('sMute'), actionWords:L('sAct'), meetingWords:L('sMeet'), eventKeywords:L('sEv'),
-                 refresh:$('sRef').value, days:$('sDays').value, calDays:$('sCal').value, lang:rv('sLang'), scheme:rv('sScheme'), theme:rv('sTheme'), navPos:rv('sNav'), replyPos:rv('sRP'), autoDemote:rv('sAuto') === 'move' };
+                 refresh:$('sRef').value, days:$('sDays').value, calDays:$('sCal').value, lang:rv('sLang'), scheme:rv('sScheme'), theme:rv('sTheme'), navPos:rv('sNav'), replyPos:rv('sRP'), replyMode:rv('sRM'), autoDemote:rv('sAuto') === 'move' };
     if (rv('sOpen')) { try { localStorage.setItem('rmm_open', rv('sOpen')); } catch (e) {} }
     var oldLang = LANG;
     RMM.run.withSuccessHandler(function (st) {
