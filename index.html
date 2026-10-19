@@ -408,7 +408,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261019a"></script>
+<script src="app-api.js?v=20261019b"></script>
 <script>
   var T = {
     ms: {
@@ -729,8 +729,17 @@
   // ===== PADAM =====
   function delSelected() { var ids = Object.keys(sel); if (ids.length) confirmDel(ids); }
   function confirmDel(ids) {
-    showM('<h3>' + t('delN', { n: ids.length }) + '</h3><div class="meta">' + t('delNote') + '</div>' +
-      '<div class="actions"><button class="btn red" onclick="doDel(' + attr(JSON.stringify(ids)) + ')">' + t('yesDel') + '</button><button class="btn ghost" onclick="closeM()">' + t('cancel') + '</button></div>');
+    // Padam terus tanpa pop up pengesahan
+    var gone = DATA.emails.filter(function (m) { return ids.indexOf(m.id) >= 0; });
+    DATA.emails = DATA.emails.filter(function (m) { return ids.indexOf(m.id) < 0; });
+    ids.forEach(function (i) { delete sel[i]; });
+    closeM(); render();
+    RMM.run.withSuccessHandler(function () { toast(t('toastDeleted')); })
+      .withFailureHandler(function (e) {
+        gone.forEach(function (m) { DATA.emails.push(m); });
+        DATA.emails.sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+        render(); fail(e);
+      }).trashThreads(ids);
   }
   function doDel(ids) {
     showM('<h3>' + t('deleting') + '</h3>');
