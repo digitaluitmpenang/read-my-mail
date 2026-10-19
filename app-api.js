@@ -254,10 +254,11 @@
     var id = c.id, isPinned = pinned.indexOf(id) > -1;
     // 'done' (versi lama) dan 'dismissed' sama: sudah ditangani -> Emel Lain
     var isDism = dismissed.indexOf(id) > -1 || done.indexOf(id) > -1;
-    var action = manual.indexOf(id) > -1 || (!muted && !isPinned && !isDism && needsAction(c.subject, c.body, c.from, cfg));
+    var action = !muted && (manual.indexOf(id) > -1 || (!isPinned && !isDism && needsAction(c.subject, c.body, c.from, cfg)));
     var important = false;
     if (!action) {
-      if (isPinned) important = true;
+      if (muted) important = false;
+      else if (isPinned) important = true;
       else if (isDism) important = false;
       else { important = score >= LIMITS.EMAIL_THRESHOLD || (!muted && isInvite(c.subject, c.body, cfg)); if (important && cfg.autoDemote && !c.unread) important = false; }
     }

@@ -408,7 +408,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261019c"></script>
+<script src="app-api.js?v=20261019d"></script>
 <script>
   var T = {
     ms: {
@@ -726,7 +726,7 @@
     var m = find(id); if (!m) return; var a = senderAddr(m.from);
     RMM.run.withSuccessHandler(function (st) {
       DATA.settings = st;
-      DATA.emails.forEach(function (x) { if (senderAddr(x.from) === a && !x.done) { x.important = false; x.action = false; } });
+      DATA.emails.forEach(function (x) { if (senderAddr(x.from) === a) { x.important = false; x.action = false; x.done = false; } });
       closeM(); render(); toast(t('toastMuted', { a: a }));
     }).withFailureHandler(fail).muteSender(m.from);
   }
