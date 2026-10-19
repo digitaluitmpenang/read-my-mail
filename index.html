@@ -408,7 +408,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261019e"></script>
+<script src="app-api.js?v=20261019f"></script>
 <script>
   var T = {
     ms: {
@@ -839,11 +839,11 @@
       var B = function (cls, ic, lab, extra) { return '<' + (extra.href ? 'a' : 'button') + ' class="btn ' + cls + '" ' + (extra.href ? 'href="' + esc(extra.href) + '" target="' + tgt() + '"' : 'onclick="' + extra.on + '"') + '>' + ico(ic) + lab + '</' + (extra.href ? 'a' : 'button') + '>'; };
       var b = B('lb', 'mail', L('openGmail'), { href: gmailLink(id) });
       var gm = (DATA.settings || {}).replyMode === 'gmail', gl = gmailLink(id);
-      b += B('yl', 'fwd', L('fwd'), { href: gm ? gl : compose('', '', d.subject, fwdOf(d), true) });
       if (mode !== 'oth') {
         b += B('yl', 'reply', L('reply'), { href: gm ? gl : compose(d.replyTo, '', d.subject, quoteOf(d)) }) +
              B('yl', 'replyall', L('replyAll'), { href: gm ? gl : compose(d.replyAllTo, d.replyAllCc, d.subject, quoteOf(d)) });
       }
+      b += B('yl', 'fwd', L('fwd'), { href: gm ? gl : compose('', '', d.subject, fwdOf(d), true) });
       if (mode === 'act') b += B('gr', 'check', L('done'), { on: "doneMail('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else if (mode === 'imp') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'star', L('markImp'), { on: "bulkOne('" + id + "')" });
