@@ -281,6 +281,7 @@
   .sub { color:var(--mute); font-size:13px; } .gst { margin:2px 0; font-size:13px; } a.lnk { color:var(--blue); }
   .optb { display:block; width:100%; text-align:left; border-radius:12px; padding:12px 14px; margin-bottom:10px; color:var(--text) !important; }
   .optb b { display:block; margin-bottom:2px; } .optb .sub { display:block; }
+  .mnav { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 10px; font-size:13px; color:var(--mute); } .mnav .btn { padding:6px 12px; font-size:13px; } .mnav .btn[disabled] { opacity:.35; pointer-events:none; }
   #auth { display:none; position:fixed; inset:0; z-index:40; background:var(--bg); align-items:center; justify-content:center; padding:24px; text-align:center; }
   .authbox { background:var(--card); border-radius:16px; padding:28px; max-width:380px; box-shadow:0 2px 12px rgba(0,0,0,.25); }
   .authbox h2 { margin:0 0 8px; display:block; font-size:22px; letter-spacing:0; color:var(--text); } .authbox p { color:var(--mute); font-size:14px; margin:0 0 18px; }
@@ -408,7 +409,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261019h"></script>
+<script src="app-api.js?v=20261023a"></script>
 <script>
   var T = {
     ms: {
@@ -418,7 +419,7 @@
       noAct:"Tiada tindakan tertunggak 🎉", noImp:"Tiada emel penting 🎉", noOth:"Tiada emel lain.", noToday:"Tiada acara hari ini.",
       noNext:"Tiada acara penting {n} hari akan datang.", none:"Tiada.",
       del:"🗑 Padam", delThis:"🗑 Padam", delRow:"Padam", less:"⬇ Kurang penting", done:"✔ Selesai", toAct:"⚑ Perlu tindakan", markImp:"⭐ Penting",
-      openGmail:"📧 Buka di Gmail", reply:"↩ Balas", fwd:"➡ Teruskan", replyAll:"↩↩ Balas Semua",
+      openGmail:"📧 Buka di Gmail", reply:"↩ Balas", fwd:"➡ Teruskan", prevMail:"‹ Sebelum", nextMail:"Seterusnya ›", replyAll:"↩↩ Balas Semua",
       close:"Tutup", autoSaved:"Disimpan automatik ✓", cancel:"Batal", yesDel:"Ya, padam", save:"Simpan", openCal:"Buka di Kalendar", mvOth:"Alih ke Perkara Lain", rsvpA:"Terima", rsvpM:"Maybe", rsvpD:"Tolak", toastRsvp:"Jawapan dihantar: {s}.", rsvpWait:"Menghantar jawapan…", mvImp:"Alih ke Penting", toastEvOth:"Dipindah ke Perkara Lain.", toastEvImp:"Dipindah ke senarai penting.",
       delN:"Padam {n} emel?", delNote:"Emel akan dipindah ke Bin Gmail (boleh dipulihkan dalam 30 hari).", deleting:"Memadam…", saving:"Menyimpan…",
       from:"Dari", to:"Kepada", cc:"Cc", date:"Tarikh", msgs:"{n} mesej", loadMail:"Memuatkan emel…",
@@ -452,7 +453,7 @@
       noAct:"Nothing waiting for action 🎉", noImp:"No important mail 🎉", noOth:"No other mail.", noToday:"No events today.",
       noNext:"No important events in the next {n} days.", none:"None.",
       del:"🗑 Delete", delThis:"🗑 Delete", delRow:"Delete", less:"⬇ Less important", done:"✔ Done", toAct:"⚑ Needs action", markImp:"⭐ Important",
-      openGmail:"📧 Open in Gmail", reply:"↩ Reply", fwd:"➡ Forward", replyAll:"↩↩ Reply all",
+      openGmail:"📧 Open in Gmail", reply:"↩ Reply", fwd:"➡ Forward", prevMail:"‹ Prev", nextMail:"Next ›", replyAll:"↩↩ Reply all",
       close:"Close", autoSaved:"Saved automatically ✓", cancel:"Cancel", yesDel:"Yes, delete", save:"Save", openCal:"Open in Calendar", mvOth:"Move to Others", rsvpA:"Accept", rsvpM:"Maybe", rsvpD:"Decline", toastRsvp:"Response sent: {s}.", rsvpWait:"Sending response…", mvImp:"Move to Important", toastEvOth:"Moved to Others.", toastEvImp:"Moved to the important list.",
       delN:"Delete {n} email(s)?", delNote:"Emails are moved to the Gmail Bin (recoverable for 30 days).", deleting:"Deleting…", saving:"Saving…",
       from:"From", to:"To", cc:"Cc", date:"Date", msgs:"{n} message(s)", loadMail:"Loading email…",
@@ -832,6 +833,14 @@
     var inner = lightOnly(d.html) || '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">' + esc(d.body) + '</pre>';
     return '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124;color-scheme:light}img{max-width:100%;height:auto}</style>' + inner;
   }
+  function modeList(mode) { return mode === 'act' ? actList() : mode === 'imp' ? impList() : othList(); }
+  function navMail(id, mode, d) {
+    var L = modeList(mode), i = -1;
+    L.forEach(function (m, k) { if (m.id === id) i = k; });
+    var tg = L[i + d]; if (!tg) return;
+    if (mode === 'act') { actIdx = i + d; renderAct(); } else if (mode === 'imp') { impIdx = i + d; renderImp(); }
+    openMail(tg.id, mode);
+  }
   function openMail(id, mode) {
     showM('<div class="meta">' + t('loadMail') + '</div>');
     RMM.run.withSuccessHandler(function (d) {
@@ -849,7 +858,9 @@
       else if (mode === 'imp') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'star', L('markImp'), { on: "bulkOne('" + id + "')" });
       b += B('pk', 'trash', L('delRow'), { on: "confirmDel(['" + id + "'])" }) + '<button class="btn ghost" onclick="closeM()">' + t('close') + '</button>';
-      showM('<h3>' + esc(d.subject) + '</h3><div class="meta"><b>' + t('from') + ':</b> ' + esc(d.from) + '<br><b>' + t('to') + ':</b> ' + esc(d.to) +
+      var NL = modeList(mode), ni = -1; NL.forEach(function (m, k) { if (m.id === id) ni = k; });
+      var nav = NL.length > 1 && ni > -1 ? '<div class="mnav"><button class="btn ghost" ' + (ni > 0 ? '' : 'disabled ') + 'onclick="navMail(\'' + id + '\',\'' + mode + '\',-1)">' + t('prevMail') + '</button><span>' + (ni + 1) + ' / ' + NL.length + '</span><button class="btn ghost" ' + (ni < NL.length - 1 ? '' : 'disabled ') + 'onclick="navMail(\'' + id + '\',\'' + mode + '\',1)">' + t('nextMail') + '</button></div>' : '';
+      showM(nav + '<h3>' + esc(d.subject) + '</h3><div class="meta"><b>' + t('from') + ':</b> ' + esc(d.from) + '<br><b>' + t('to') + ':</b> ' + esc(d.to) +
         (d.cc ? '<br><b>' + t('cc') + ':</b> ' + esc(d.cc) : '') + '<br><b>' + t('date') + ':</b> ' + new Date(d.date).toLocaleString(loc()) + ' · ' + t('msgs', { n: d.count }) + '</div>' +
         '<iframe class="mframe" sandbox="allow-popups allow-popups-to-escape-sandbox" srcdoc="' + attr(threadDoc(d)) + '"></iframe><div class="actions">' + b + '</div>');
     }).withFailureHandler(function (e) { closeM(); fail(e); }).getEmailDetail(id);
