@@ -282,6 +282,20 @@
   .optb { display:block; width:100%; text-align:left; border-radius:12px; padding:12px 14px; margin-bottom:10px; color:var(--text) !important; }
   .optb b { display:block; margin-bottom:2px; } .optb .sub { display:block; }
   .mnav { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 10px; font-size:13px; color:var(--mute); } .mnav .btn { padding:6px 12px; font-size:13px; } .mnav .btn[disabled] { opacity:.35; pointer-events:none; }
+  #srch { display:none; position:fixed; left:0; right:0; bottom:0; z-index:4; background:var(--bg); overflow-y:auto; padding:12px 16px 90px; }
+  #srch .sinner { max-width:980px; margin:0 auto; background:var(--card); border-radius:16px; padding:14px 16px; box-shadow:0 1px 4px rgba(0,0,0,.12); border-top:4px solid var(--blue); }
+  .sin { display:flex; gap:8px; align-items:center; } .sico { font-size:20px; }
+  .sin input { flex:1; min-width:0; font-size:16px; padding:11px 14px; border:1.5px solid var(--blue); border-radius:12px; background:var(--bg); color:var(--text); }
+  .sin .sx { border:0; background:none; font-size:20px; color:var(--mute); padding:6px; cursor:pointer; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px; }
+  .chip { border:1.5px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px; color:var(--text); background:var(--card); cursor:pointer; font-family:inherit; }
+  .chip.on { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .stip, .scnt { font-size:12px; color:var(--mute); margin-top:8px; } .scnt { font-size:13px; margin-bottom:4px; }
+  .sres { border-top:1px solid var(--line); padding:10px 4px; display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
+  .sres .sb { flex:1; min-width:0; } .sres .fr { font-weight:700; font-size:15px; } .sres .sj { font-size:15px; } .sres .sn { font-size:13px; color:var(--mute); margin-top:2px; }
+  .sres .dt { margin-left:auto; font-size:12px; color:var(--mute); white-space:nowrap; }
+  .sres mark { background:#ffe08a; border-radius:3px; padding:0 2px; color:#202124; }
+  .stag { display:inline-block; font-size:11px; border-radius:6px; padding:1px 6px; margin-top:4px; background:var(--line); color:var(--text); }
   #auth { display:none; position:fixed; inset:0; z-index:40; background:var(--bg); align-items:center; justify-content:center; padding:24px; text-align:center; }
   .authbox { background:var(--card); border-radius:16px; padding:28px; max-width:380px; box-shadow:0 2px 12px rgba(0,0,0,.25); }
   .authbox h2 { margin:0 0 8px; display:block; font-size:22px; letter-spacing:0; color:var(--text); } .authbox p { color:var(--mute); font-size:14px; margin:0 0 18px; }
@@ -335,12 +349,20 @@
   <div id="title"></div>
   <div class="hbtns"><span class="spin sm" id="hspin"></span><small id="upd"></small>
     <button class="btn ghost" id="inst" style="display:none" onclick="RMM.install()" title="Pasang app / Install app">⬇ App</button>
+    <button class="btn ghost" onclick="openSearch()" title="Cari / Search" aria-label="Search">🔍</button>
     <button class="btn ghost" onclick="openManual()" title="Manual">?<span class="hs"> <span data-i="manual"></span></span></button>
     <button class="btn ghost" onclick="openSettings()">⚙<span class="hs"> <span data-i="settings"></span></span></button>
     <button class="btn" id="refBtn" onclick="load()">↻<span class="hs"> <span data-i="refresh"></span></span></button>
   </div>
 </header>
 <div id="flagbar"><i></i><i></i><i></i><i></i></div>
+<div id="srch"><div class="sinner">
+  <div class="sin"><span class="sico">🔍</span><input id="sq" type="text" autocomplete="off" enterkeyhint="search" onkeydown="if(event.key==='Enter')runSearch()"><button class="btn ghost" onclick="runSearch()" id="sgo"></button><button class="sx" onclick="closeSearch()" aria-label="Close">✕</button></div>
+  <div class="chips" id="schips"></div>
+  <div class="stip" id="stip"></div>
+  <div class="scnt" id="scnt"></div>
+  <div id="sres"></div>
+</div></div>
 
 <div id="stats"></div>
 <div id="shell" class="side">
@@ -409,7 +431,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261023a"></script>
+<script src="app-api.js?v=20261030a"></script>
 <script>
   var T = {
     ms: {
@@ -419,7 +441,7 @@
       noAct:"Tiada tindakan tertunggak 🎉", noImp:"Tiada emel penting 🎉", noOth:"Tiada emel lain.", noToday:"Tiada acara hari ini.",
       noNext:"Tiada acara penting {n} hari akan datang.", none:"Tiada.",
       del:"🗑 Padam", delThis:"🗑 Padam", delRow:"Padam", less:"⬇ Kurang penting", done:"✔ Selesai", toAct:"⚑ Perlu tindakan", markImp:"⭐ Penting",
-      openGmail:"📧 Buka di Gmail", reply:"↩ Balas", fwd:"➡ Teruskan", prevMail:"‹ Sebelum", nextMail:"Seterusnya ›", replyAll:"↩↩ Balas Semua",
+      openGmail:"📧 Buka di Gmail", reply:"↩ Balas", fwd:"➡ Teruskan", sPh:"Cari emel (isi, tajuk, pengirim, penerima)", sGo:"Cari", sAll:"Semua", sFrom:"Pengirim", sTo:"Penerima", sSub:"Tajuk", sAtt:"📎 Ada lampiran", s30:"30 hari", sYr:"Tahun ini", sTip:"Tekan Enter untuk cari. Boleh guna: dari: / kepada: / subject: / has:attachment", sCnt:"{n} hasil · seluruh Gmail (termasuk emel lama)", sMore:"{n} hasil pertama sahaja. Perincikan carian untuk hasil lebih tepat.", sNone:"Tiada emel dijumpai.", sBusy:"Mencari…", tagAct:"Perlu tindakan", tagImp:"Penting", tagOth:"Emel lain", tagSent:"Dihantar", tagOld:"Arkib", sTo2:"Kepada", prevMail:"‹ Sebelum", nextMail:"Seterusnya ›", replyAll:"↩↩ Balas Semua",
       close:"Tutup", autoSaved:"Disimpan automatik ✓", cancel:"Batal", yesDel:"Ya, padam", save:"Simpan", openCal:"Buka di Kalendar", mvOth:"Alih ke Perkara Lain", rsvpA:"Terima", rsvpM:"Maybe", rsvpD:"Tolak", toastRsvp:"Jawapan dihantar: {s}.", rsvpWait:"Menghantar jawapan…", mvImp:"Alih ke Penting", toastEvOth:"Dipindah ke Perkara Lain.", toastEvImp:"Dipindah ke senarai penting.",
       delN:"Padam {n} emel?", delNote:"Emel akan dipindah ke Bin Gmail (boleh dipulihkan dalam 30 hari).", deleting:"Memadam…", saving:"Menyimpan…",
       from:"Dari", to:"Kepada", cc:"Cc", date:"Tarikh", msgs:"{n} mesej", loadMail:"Memuatkan emel…",
@@ -453,7 +475,7 @@
       noAct:"Nothing waiting for action 🎉", noImp:"No important mail 🎉", noOth:"No other mail.", noToday:"No events today.",
       noNext:"No important events in the next {n} days.", none:"None.",
       del:"🗑 Delete", delThis:"🗑 Delete", delRow:"Delete", less:"⬇ Less important", done:"✔ Done", toAct:"⚑ Needs action", markImp:"⭐ Important",
-      openGmail:"📧 Open in Gmail", reply:"↩ Reply", fwd:"➡ Forward", prevMail:"‹ Prev", nextMail:"Next ›", replyAll:"↩↩ Reply all",
+      openGmail:"📧 Open in Gmail", reply:"↩ Reply", fwd:"➡ Forward", sPh:"Search mail (content, subject, sender, recipient)", sGo:"Search", sAll:"All", sFrom:"Sender", sTo:"Recipient", sSub:"Subject", sAtt:"📎 Has attachment", s30:"30 days", sYr:"This year", sTip:"Press Enter to search. You can use: from: / to: / subject: / has:attachment", sCnt:"{n} results · all of Gmail (including old mail)", sMore:"First {n} results only. Refine your search for better results.", sNone:"No mail found.", sBusy:"Searching…", tagAct:"Needs action", tagImp:"Important", tagOth:"Other mail", tagSent:"Sent", tagOld:"Archive", sTo2:"To", prevMail:"‹ Prev", nextMail:"Next ›", replyAll:"↩↩ Reply all",
       close:"Close", autoSaved:"Saved automatically ✓", cancel:"Cancel", yesDel:"Yes, delete", save:"Save", openCal:"Open in Calendar", mvOth:"Move to Others", rsvpA:"Accept", rsvpM:"Maybe", rsvpD:"Decline", toastRsvp:"Response sent: {s}.", rsvpWait:"Sending response…", mvImp:"Move to Important", toastEvOth:"Moved to Others.", toastEvImp:"Moved to the important list.",
       delN:"Delete {n} email(s)?", delNote:"Emails are moved to the Gmail Bin (recoverable for 30 days).", deleting:"Deleting…", saving:"Saving…",
       from:"From", to:"To", cc:"Cc", date:"Date", msgs:"{n} message(s)", loadMail:"Loading email…",
@@ -738,10 +760,12 @@
     // Padam terus tanpa pop up pengesahan
     var gone = DATA.emails.filter(function (m) { return ids.indexOf(m.id) >= 0; });
     DATA.emails = DATA.emails.filter(function (m) { return ids.indexOf(m.id) < 0; });
+    var sgone = SR.filter(function (m) { return ids.indexOf(m.id) >= 0; }); SR = SR.filter(function (m) { return ids.indexOf(m.id) < 0; });
     ids.forEach(function (i) { delete sel[i]; });
-    closeM(); render();
+    closeM(); render(); if ($('srch').style.display === 'block') drawSearch();
     RMM.run.withSuccessHandler(function () { toast(t('toastDeleted')); })
       .withFailureHandler(function (e) {
+        SR = SR.concat(sgone); if ($('srch').style.display === 'block') drawSearch();
         gone.forEach(function (m) { DATA.emails.push(m); });
         DATA.emails.sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
         render(); fail(e);
@@ -833,7 +857,49 @@
     var inner = lightOnly(d.html) || '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">' + esc(d.body) + '</pre>';
     return '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124;color-scheme:light}img{max-width:100%;height:auto}</style>' + inner;
   }
-  function modeList(mode) { return mode === 'act' ? actList() : mode === 'imp' ? impList() : othList(); }
+  // ===== CARIAN =====
+  var SR = [], sF = { f:'all', att:false, range:'' };
+  function modeList(mode) { return mode === 'act' ? actList() : mode === 'imp' ? impList() : mode === 'srch' ? SR : othList(); }
+  function srchTop() { var h = document.querySelector('header'), fb = $('flagbar'); return Math.round((fb ? fb.getBoundingClientRect().bottom : h.getBoundingClientRect().bottom)); }
+  function openSearch() {
+    var p = $('srch'); p.style.top = srchTop() + 'px'; p.style.display = 'block';
+    $('sq').placeholder = t('sPh'); $('sgo').textContent = t('sGo'); $('stip').textContent = t('sTip'); drawChips();
+    setTimeout(function () { $('sq').focus(); }, 50);
+  }
+  function closeSearch() { $('srch').style.display = 'none'; }
+  function drawChips() {
+    var c = function (on, lab, fn) { return '<button class="chip' + (on ? ' on' : '') + '" onclick="' + fn + '">' + lab + '</button>'; };
+    $('schips').innerHTML = c(sF.f === 'all', t('sAll'), "sSet('f','all')") + c(sF.f === 'from', t('sFrom'), "sSet('f','from')") + c(sF.f === 'to', t('sTo'), "sSet('f','to')") + c(sF.f === 'subject', t('sSub'), "sSet('f','subject')") +
+      c(sF.att, t('sAtt'), "sSet('att')") + c(sF.range === '30', t('s30'), "sSet('range','30')") + c(sF.range === 'year', t('sYr'), "sSet('range','year')");
+  }
+  function sSet(k, v) {
+    if (k === 'att') sF.att = !sF.att; else if (k === 'range') sF.range = sF.range === v ? '' : v; else sF.f = v;
+    drawChips(); if ($('sq').value.trim() || sF.att) runSearch();
+  }
+  function hl(s, words) {
+    var h = esc(s);
+    words.forEach(function (w) { if (w.length < 2 || /^(amp|lt|gt|quot)$/i.test(w)) return; h = h.replace(new RegExp(esc(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), function (x) { return '<mark>' + x + '</mark>'; }); });
+    return h;
+  }
+  function sTag(r) {
+    var m = find(r.id); if (m) return m.action ? t('tagAct') : m.important ? t('tagImp') : t('tagOth');
+    return r.sent ? t('tagSent') : t('tagOld');
+  }
+  function drawSearch(more) {
+    var words = $('sq').value.replace(/\b(from|to|cc|bcc|subject|has|in|label|after|before|newer_than|older_than|is|filename):\S*/gi, ' ').replace(/["()]/g, ' ').split(/\s+/).filter(Boolean);
+    if (!SR.length) { $('scnt').textContent = t('sNone'); $('sres').innerHTML = ''; return; }
+    $('scnt').textContent = more ? t('sMore', { n: SR.length }) : t('sCnt', { n: SR.length });
+    $('sres').innerHTML = SR.map(function (r) {
+      var who = r.sent ? t('sTo2') + ': ' + nm(r.to || '') : nm(r.from);
+      return '<div class="sres" onclick="openMail(\'' + r.id + '\',\'srch\')"><div class="sb"><div class="fr">' + hl(who, words) + '</div><div class="sj">' + hl(r.subject, words) + '</div><div class="sn">' + hl(r.snippet, words) + '</div><span class="stag">' + esc(sTag(r)) + '</span></div><div class="dt">' + esc(fM(r.date)) + '</div></div>';
+    }).join('');
+  }
+  function runSearch() {
+    var q = $('sq').value.trim(); if (!q && !sF.att) return;
+    $('scnt').textContent = t('sBusy');
+    RMM.run.withSuccessHandler(function (r) { SR = r.items; drawSearch(r.more); }).withFailureHandler(function (e) { $('scnt').textContent = ''; fail(e); }).searchMail({ q: q, f: sF.f, att: sF.att, range: sF.range });
+  }
+
   function navMail(id, mode, d) {
     var L = modeList(mode), i = -1;
     L.forEach(function (m, k) { if (m.id === id) i = k; });
@@ -856,7 +922,7 @@
       b += B('yl', 'fwd', L('fwd'), { href: gm ? gl : compose('', '', d.subject, fwdOf(d), true) });
       if (mode === 'act') b += B('gr', 'check', L('done'), { on: "doneMail('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else if (mode === 'imp') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
-      else b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'star', L('markImp'), { on: "bulkOne('" + id + "')" });
+      else if (mode !== 'srch') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'star', L('markImp'), { on: "bulkOne('" + id + "')" });
       b += B('pk', 'trash', L('delRow'), { on: "confirmDel(['" + id + "'])" }) + '<button class="btn ghost" onclick="closeM()">' + t('close') + '</button>';
       var NL = modeList(mode), ni = -1; NL.forEach(function (m, k) { if (m.id === id) ni = k; });
       var nav = NL.length > 1 && ni > -1 ? '<div class="mnav"><button class="btn ghost" ' + (ni > 0 ? '' : 'disabled ') + 'onclick="navMail(\'' + id + '\',\'' + mode + '\',-1)">' + t('prevMail') + '</button><span>' + (ni + 1) + ' / ' + NL.length + '</span><button class="btn ghost" ' + (ni < NL.length - 1 ? '' : 'disabled ') + 'onclick="navMail(\'' + id + '\',\'' + mode + '\',1)">' + t('nextMail') + '</button></div>' : '';

@@ -368,6 +368,35 @@
     });
   }
 
+  // Carian terus ke Gmail (seluruh peti emel). f: all|from|to|subject, att: ada lampiran, range: ''|30|year
+  function searchMail(o) {
+    o = o || {};
+    var q = String(o.q || '').trim();
+    if (!q && !o.att) return Promise.resolve({ items: [], more: false });
+    var term = q, w = q.replace(/["()]/g, ' ').replace(/\s+/g, ' ').trim();
+    var hasOp = /(^|\s)(from|to|cc|bcc|subject|has|in|label|after|before|newer_than|older_than|is|filename):/i.test(q);
+    if (q && !hasOp) {
+      if (o.f === 'from') term = 'from:(' + w + ')';
+      else if (o.f === 'to') term = '(to:(' + w + ') OR cc:(' + w + ') OR bcc:(' + w + '))';
+      else if (o.f === 'subject') term = 'subject:(' + w + ')';
+    }
+    if (o.att) term += ' has:attachment';
+    if (o.range === '30') term += ' newer_than:30d';
+    else if (o.range === 'year') term += ' after:' + new Date().getFullYear() + '/1/1';
+    return gfetch(GM + '/threads?maxResults=25&q=' + encodeURIComponent(term)).then(function (r) {
+      var ths = (r && r.threads) || [];
+      var mh = '&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Cc&metadataHeaders=Subject&metadataHeaders=Date';
+      return Promise.all(ths.map(function (t) {
+        return gfetch(GM + '/threads/' + t.id + '?format=metadata' + mh).then(function (th) {
+          var ms = (th && th.messages) || [], last = ms[ms.length - 1], first = ms[0]; if (!last) return null;
+          var lb = last.labelIds || [];
+          return { id: t.id, subject: hdr(first, 'subject') || '(tiada tajuk)', from: hdr(last, 'from'), to: hdr(last, 'to'), cc: hdr(last, 'cc'),
+                   date: new Date(Number(last.internalDate)).toISOString(), snippet: last.snippet || t.snippet || '', sent: lb.indexOf('SENT') > -1, count: ms.length };
+        }).catch(function () { return null; });
+      })).then(function (items) { return { items: items.filter(Boolean), more: !!(r && r.nextPageToken) }; });
+    });
+  }
+
   function trashThreads(ids) {
     return Promise.all(ids.map(function (id) { return gfetch(GM + '/threads/' + id + '/trash', { method: 'POST' }); })).then(function () { return ids.length; });
   }
@@ -480,6 +509,7 @@
     },
     getEmailDetail: getEmailDetail,
     trashThreads: trashThreads,
+    searchMail: searchMail,
     saveSettings: function (s) { return needState().then(function () { return saveSettings(s); }); },
     resetLists: function () { return needState().then(function () { var st = STATE.settings || {}; st.add = {}; st.del = {}; STATE.settings = st; persist(); return getSettings(); }); },
     muteSender: function (from) {
