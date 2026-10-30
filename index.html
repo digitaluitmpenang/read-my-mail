@@ -431,7 +431,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261030c"></script>
+<script src="app-api.js?v=20261030d"></script>
 <script>
   var T = {
     ms: {
@@ -858,7 +858,7 @@
     return '<base target="_blank"><style>body{font-family:Arial,sans-serif;font-size:14px;margin:12px;word-wrap:break-word;background:#fff;color:#202124;color-scheme:light}img{max-width:100%;height:auto}</style>' + inner;
   }
   // ===== CARIAN =====
-  var SR = [], sF = { f:'all', att:false, range:'' };
+  var SR = [], sMoreF = false, sF = { f:'all', att:false, range:'' };
   function modeList(mode) { return mode === 'act' ? actList() : mode === 'imp' ? impList() : mode === 'srch' ? SR : othList(); }
   function srchTop() { var h = document.querySelector('header'), fb = $('flagbar'); return Math.round((fb ? fb.getBoundingClientRect().bottom : h.getBoundingClientRect().bottom)); }
   function openSearch() {
@@ -897,7 +897,7 @@
   function runSearch() {
     var q = $('sq').value.trim(); if (!q && !sF.att) return;
     $('scnt').textContent = t('sBusy');
-    RMM.run.withSuccessHandler(function (r) { SR = r.items; drawSearch(r.more); }).withFailureHandler(function (e) { $('scnt').textContent = ''; fail(e); }).searchMail({ q: q, f: sF.f, att: sF.att, range: sF.range });
+    RMM.run.withSuccessHandler(function (r) { SR = r.items; sMoreF = r.more; drawSearch(r.more); }).withFailureHandler(function (e) { $('scnt').textContent = ''; fail(e); }).searchMail({ q: q, f: sF.f, att: sF.att, range: sF.range });
   }
 
   function navMail(id, mode, d) {
@@ -920,9 +920,11 @@
              B('yl', 'replyall', L('replyAll'), { href: gm ? gl : compose(d.replyAllTo, d.replyAllCc, d.subject, quoteOf(d)) });
       }
       b += B('yl', 'fwd', L('fwd'), { href: gm ? gl : compose('', '', d.subject, fwdOf(d), true) });
-      if (mode === 'act') b += B('gr', 'check', L('done'), { on: "doneMail('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
-      else if (mode === 'imp') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
-      else if (mode !== 'srch') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'star', L('markImp'), { on: "bulkOne('" + id + "')" });
+      var em = mode;
+      if (mode === 'srch') { var cm = find(id); em = cm ? (cm.action ? 'act' : cm.important ? 'imp' : 'oth') : ''; }
+      if (em === 'act') b += B('gr', 'check', L('done'), { on: "doneMail('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
+      else if (em === 'imp') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
+      else if (em) b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'star', L('markImp'), { on: "bulkOne('" + id + "')" });
       b += B('pk', 'trash', L('delRow'), { on: "confirmDel(['" + id + "'])" }) + '<button class="btn ghost" onclick="closeM()">' + t('close') + '</button>';
       var NL = modeList(mode), ni = -1; NL.forEach(function (m, k) { if (m.id === id) ni = k; });
       var nav = NL.length > 1 && ni > -1 ? '<div class="mnav"><button class="btn ghost" ' + (ni > 0 ? '' : 'disabled ') + 'onclick="navMail(\'' + id + '\',\'' + mode + '\',-1)">' + t('prevMail') + '</button><span>' + (ni + 1) + ' / ' + NL.length + '</span><button class="btn ghost" ' + (ni < NL.length - 1 ? '' : 'disabled ') + 'onclick="navMail(\'' + id + '\',\'' + mode + '\',1)">' + t('nextMail') + '</button></div>' : '';
@@ -1191,7 +1193,7 @@
     $('upd').textContent = t('updated') + ' ' + fT(DATA.updated);
   }
   function showM(h) { $('modal').innerHTML = h; $('ov').style.display = 'flex'; }
-  function closeM() { $('ov').style.display = 'none'; clearTimeout(saveTimer); if (setDirty && !saving) { setDirty = false; load(); } }
+  function closeM() { $('ov').style.display = 'none'; if (window.SR && SR.length && $('srch').style.display === 'block') drawSearch(sMoreF); clearTimeout(saveTimer); if (setDirty && !saving) { setDirty = false; load(); } }
   function toast(m) {
     var e = $('toast'); e.textContent = m; e.style.display = 'block';
     clearTimeout(window._tt); window._tt = setTimeout(function () { e.style.display = 'none'; }, 6000);
