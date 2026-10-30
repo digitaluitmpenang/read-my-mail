@@ -15,7 +15,7 @@
   var CAL = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
   var DRIVE = 'https://www.googleapis.com/drive/v3/files';
   var TASKS = 'https://tasks.googleapis.com/tasks/v1/lists/@default/tasks';
-  var LIMITS = { MAX_THREADS: 60, EMAIL_THRESHOLD: 3, EVENT_THRESHOLD: 2, DAYS_AHEAD: 3, KEEP_IDS: 300, CONC: 4, FETCH_BUDGET: 30 };
+  var LIMITS = { MAX_THREADS: 60, EMAIL_THRESHOLD: 3, EVENT_THRESHOLD: 2, DAYS_AHEAD: 3, KEEP_IDS: 300, CONC: 4, FETCH_BUDGET: 30, MAX_OLD: 50 };
 
   var DEFAULTS = {
     vip: [], muted: [],
@@ -315,9 +315,33 @@
           function (e) { if (e && e.code === 'AUTH') throw e; if (e && e.code === 'QUOTA') quotaHit = true; PARTIAL = true; if (c) out.push(c); }).then(worker);
       }
       var ws = []; for (var k = 0; k < LIMITS.CONC; k++) ws.push(worker());
+      // Emel lama (di luar tempoh imbasan / bukan Inbox) yang pengguna naikkan ke Perlu Tindakan / Penting: diambil terus mengikut id
+      var inList = {}; list.forEach(function (t) { inList[t.id] = 1; });
+      var extra = [], seen = {};
+      var ok = listOf('oldkeep'); listOf('manual').concat(listOf('pinned')).forEach(function (id) { if (!inList[id] && !seen[id] && ok.indexOf(id) > -1) { seen[id] = 1; extra.push(id); } });
+      extra = extra.slice(-LIMITS.MAX_OLD);
+      var gone = [], j = 0, TTL = 6 * 3600 * 1000;
+      function xworker() {
+        if (j >= extra.length) return Promise.resolve();
+        var id = extra[j++], c = TC[id];
+        if (c && c.at && Date.now() - c.at < TTL) { out.push(c); return xworker(); }
+        if (quotaHit || budget <= 0) { PARTIAL = true; if (c) out.push(c); return xworker(); }
+        budget--;
+        return gfetch(GM + '/threads/' + id + '?format=full').then(function (th) {
+          var ms = th.messages || [];
+          if (!ms.length || ms.every(function (m) { return (m.labelIds || []).indexOf('TRASH') > -1; })) { gone.push(id); delete TC[id]; return; }
+          var c2 = parseThread(th, th.historyId); c2.at = Date.now(); TC[id] = c2; out.push(c2);
+        }, function (e) {
+          if (e && e.code === 'AUTH') throw e;
+          if (e && /404/.test(String(e.message))) { gone.push(id); delete TC[id]; return; }
+          if (e && e.code === 'QUOTA') quotaHit = true; PARTIAL = true; if (c) out.push(c);
+        }).then(xworker);
+      }
+      var xs = []; for (var k2 = 0; k2 < 2; k2++) xs.push(xworker());
       // Simpan kemajuan walaupun ada ralat di tengah (cth. sesi tamat) supaya muat seterusnya tak ulang semua
-      var save = function () { var keep = {}; list.forEach(function (t) { if (TC[t.id]) keep[t.id] = TC[t.id]; }); TC = keep; lsSet('rmm_tc', TC); };
-      return Promise.all(ws).catch(function (e) { save(); throw e; }).then(function () {
+      var save = function () { var keep = {}; list.concat(extra.map(function (id) { return { id: id }; })).forEach(function (t) { if (TC[t.id]) keep[t.id] = TC[t.id]; }); TC = keep; lsSet('rmm_tc', TC); };
+      return Promise.all(ws.concat(xs)).catch(function (e) { save(); throw e; }).then(function () {
+        if (gone.length) { removeMany('manual', gone); removeMany('pinned', gone); removeMany('oldkeep', gone); persist(); }
         save();
         return out.map(function (c) { return buildEmail(c, cfg); }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
       });
@@ -524,8 +548,8 @@
     grantTasks: function () { tok = null; lsDel('rmm_tok'); return requestToken('consent').then(function () { return true; }); },
     moveEvent: function (id, to) { return needState().then(function () { var a = to === 'imp' ? 'evUp' : 'evDown', b = to === 'imp' ? 'evDown' : 'evUp'; addMany(a, [id]); removeMany(b, [id]); persist(); return true; }); },
     markDone: function (id) { return needState().then(function () { addMany('dismissed', [id]); ['manual', 'pinned', 'done'].forEach(function (k) { removeMany(k, [id]); }); persist(); return true; }); },
-    setActions: function (ids) { return needState().then(function () { addMany('manual', ids); ['done', 'dismissed', 'pinned'].forEach(function (k) { removeMany(k, ids); }); persist(); return true; }); },
-    pinImportant: function (ids) { return needState().then(function () { addMany('pinned', ids); ['dismissed', 'manual', 'done'].forEach(function (k) { removeMany(k, ids); }); persist(); return true; }); },
+    setActions: function (ids, old) { return needState().then(function () { addMany('manual', ids); if (old) addMany('oldkeep', ids); ['done', 'dismissed', 'pinned'].forEach(function (k) { removeMany(k, ids); }); persist(); return true; }); },
+    pinImportant: function (ids, old) { return needState().then(function () { addMany('pinned', ids); if (old) addMany('oldkeep', ids); ['dismissed', 'manual', 'done'].forEach(function (k) { removeMany(k, ids); }); persist(); return true; }); },
     dismissThread: function (id) { return needState().then(function () { addMany('dismissed', [id]); ['pinned', 'manual', 'done'].forEach(function (k) { removeMany(k, [id]); }); persist(); return true; }); }
   };
 

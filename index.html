@@ -431,7 +431,7 @@
 
 <script src="config.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app-api.js?v=20261030e"></script>
+<script src="app-api.js?v=20261030f"></script>
 <script>
   var T = {
     ms: {
@@ -441,7 +441,7 @@
       noAct:"Tiada tindakan tertunggak 🎉", noImp:"Tiada emel penting 🎉", noOth:"Tiada emel lain.", noToday:"Tiada acara hari ini.",
       noNext:"Tiada acara penting {n} hari akan datang.", none:"Tiada.",
       del:"🗑 Padam", delThis:"🗑 Padam", delRow:"Padam", less:"⬇ Kurang penting", done:"✔ Selesai", toAct:"⚑ Perlu tindakan", markImp:"⭐ Penting",
-      openGmail:"📧 Buka di Gmail", reply:"↩ Balas", fwd:"➡ Teruskan", sPh:"Cari emel (isi, tajuk, pengirim, penerima)", sGo:"Cari", sAll:"Semua", sFrom:"Pengirim", sTo:"Penerima", sSub:"Tajuk", sAtt:"__CLIP__ Ada lampiran", s30:"30 hari", sYr:"Tahun ini", sTip:"Tekan Enter untuk cari. Boleh guna: dari: / kepada: / subject: / has:attachment", sCnt:"{n} hasil · seluruh Gmail (termasuk emel lama)", sMore:"{n} hasil pertama sahaja. Perincikan carian untuk hasil lebih tepat.", sNone:"Tiada emel dijumpai.", sBusy:"Mencari…", tagAct:"Perlu tindakan", tagImp:"Penting", tagOth:"Emel lain", tagSent:"Dihantar", tagOld:"Arkib", sTo2:"Kepada", prevMail:"‹ Sebelum", nextMail:"Seterusnya ›", replyAll:"↩↩ Balas Semua",
+      openGmail:"📧 Buka di Gmail", reply:"↩ Balas", fwd:"➡ Teruskan", oldLimit:"Had 50 emel lama dicapai. Selesaikan beberapa dulu.", sPh:"Cari emel (isi, tajuk, pengirim, penerima)", sGo:"Cari", sAll:"Semua", sFrom:"Pengirim", sTo:"Penerima", sSub:"Tajuk", sAtt:"__CLIP__ Ada lampiran", s30:"30 hari", sYr:"Tahun ini", sTip:"Tekan Enter untuk cari. Boleh guna: dari: / kepada: / subject: / has:attachment", sCnt:"{n} hasil · seluruh Gmail (termasuk emel lama)", sMore:"{n} hasil pertama sahaja. Perincikan carian untuk hasil lebih tepat.", sNone:"Tiada emel dijumpai.", sBusy:"Mencari…", tagAct:"Perlu tindakan", tagImp:"Penting", tagOth:"Emel lain", tagSent:"Dihantar", tagOld:"Arkib", sTo2:"Kepada", prevMail:"‹ Sebelum", nextMail:"Seterusnya ›", replyAll:"↩↩ Balas Semua",
       close:"Tutup", autoSaved:"Disimpan automatik ✓", cancel:"Batal", yesDel:"Ya, padam", save:"Simpan", openCal:"Buka di Kalendar", mvOth:"Alih ke Perkara Lain", rsvpA:"Terima", rsvpM:"Maybe", rsvpD:"Tolak", toastRsvp:"Jawapan dihantar: {s}.", rsvpWait:"Menghantar jawapan…", mvImp:"Alih ke Penting", toastEvOth:"Dipindah ke Perkara Lain.", toastEvImp:"Dipindah ke senarai penting.",
       delN:"Padam {n} emel?", delNote:"Emel akan dipindah ke Bin Gmail (boleh dipulihkan dalam 30 hari).", deleting:"Memadam…", saving:"Menyimpan…",
       from:"Dari", to:"Kepada", cc:"Cc", date:"Tarikh", msgs:"{n} mesej", loadMail:"Memuatkan emel…",
@@ -475,7 +475,7 @@
       noAct:"Nothing waiting for action 🎉", noImp:"No important mail 🎉", noOth:"No other mail.", noToday:"No events today.",
       noNext:"No important events in the next {n} days.", none:"None.",
       del:"🗑 Delete", delThis:"🗑 Delete", delRow:"Delete", less:"⬇ Less important", done:"✔ Done", toAct:"⚑ Needs action", markImp:"⭐ Important",
-      openGmail:"📧 Open in Gmail", reply:"↩ Reply", fwd:"➡ Forward", sPh:"Search mail (content, subject, sender, recipient)", sGo:"Search", sAll:"All", sFrom:"Sender", sTo:"Recipient", sSub:"Subject", sAtt:"__CLIP__ Has attachment", s30:"30 days", sYr:"This year", sTip:"Press Enter to search. You can use: from: / to: / subject: / has:attachment", sCnt:"{n} results · all of Gmail (including old mail)", sMore:"First {n} results only. Refine your search for better results.", sNone:"No mail found.", sBusy:"Searching…", tagAct:"Needs action", tagImp:"Important", tagOth:"Other mail", tagSent:"Sent", tagOld:"Archive", sTo2:"To", prevMail:"‹ Prev", nextMail:"Next ›", replyAll:"↩↩ Reply all",
+      openGmail:"📧 Open in Gmail", reply:"↩ Reply", fwd:"➡ Forward", oldLimit:"Limit of 50 old emails reached. Please finish some first.", sPh:"Search mail (content, subject, sender, recipient)", sGo:"Search", sAll:"All", sFrom:"Sender", sTo:"Recipient", sSub:"Subject", sAtt:"__CLIP__ Has attachment", s30:"30 days", sYr:"This year", sTip:"Press Enter to search. You can use: from: / to: / subject: / has:attachment", sCnt:"{n} results · all of Gmail (including old mail)", sMore:"First {n} results only. Refine your search for better results.", sNone:"No mail found.", sBusy:"Searching…", tagAct:"Needs action", tagImp:"Important", tagOth:"Other mail", tagSent:"Sent", tagOld:"Archive", sTo2:"To", prevMail:"‹ Prev", nextMail:"Next ›", replyAll:"↩↩ Reply all",
       close:"Close", autoSaved:"Saved automatically ✓", cancel:"Cancel", yesDel:"Yes, delete", save:"Save", openCal:"Open in Calendar", mvOth:"Move to Others", rsvpA:"Accept", rsvpM:"Maybe", rsvpD:"Decline", toastRsvp:"Response sent: {s}.", rsvpWait:"Sending response…", mvImp:"Move to Important", toastEvOth:"Moved to Others.", toastEvImp:"Moved to the important list.",
       delN:"Delete {n} email(s)?", delNote:"Emails are moved to the Gmail Bin (recoverable for 30 days).", deleting:"Deleting…", saving:"Saving…",
       from:"From", to:"To", cc:"Cc", date:"Date", msgs:"{n} message(s)", loadMail:"Loading email…",
@@ -714,20 +714,35 @@
       closeM(); render(); toast(t('toastDone'));
     }).withFailureHandler(fail).markDone(id);
   }
+  // Emel lama (hasil carian, di luar senarai app): masukkan ke senarai app sebelum dinaikkan. Had 50 emel lama.
+  function isOld(m) { return new Date(m.date).getTime() < Date.now() - ((DATA.settings || {}).days || 7) * 864e5; }
+  function adoptOld(ids) {
+    var need = ids.filter(function (id) { return !find(id); }); if (!need.length) return { ok: true, old: false };
+    var cnt = DATA.emails.filter(function (m) { return (m.action || m.important) && isOld(m); }).length;
+    if (cnt + need.length > 50) { toast(t('oldLimit')); return { ok: false }; }
+    need.forEach(function (id) {
+      var r = SR.filter(function (x) { return x.id === id; })[0]; if (!r) return;
+      DATA.emails.push({ id: id, subject: r.subject, from: r.from, date: r.date, unread: false, starred: false, preview: (r.snippet || '').substring(0, 220), action: false, done: false, important: false });
+    });
+    DATA.emails.sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+    return { ok: true, old: true };
+  }
   function moveToAct(ids, after) {
+    var ad = adoptOld(ids); if (!ad.ok) return;
     RMM.run.withSuccessHandler(function () {
       ids.forEach(function (id) { var m = find(id); if (m) { m.action = true; m.done = false; m.important = false; } delete sel[id]; });
       closeM(); render(); toast(t('toastAct'));
-    }).withFailureHandler(fail).setActions(ids);
+    }).withFailureHandler(fail).setActions(ids, ids.some(function (id) { var m = find(id); return m && isOld(m); }));
   }
   function toAct(id) { moveToAct([id]); }
   function bulkAct() { var ids = Object.keys(sel); if (ids.length) moveToAct(ids); }
   function bulkImp() {
     var ids = Object.keys(sel); if (!ids.length) return;
+    if (!adoptOld(ids).ok) return;
     RMM.run.withSuccessHandler(function () {
       ids.forEach(function (id) { var m = find(id); if (m) { m.important = true; m.action = false; } delete sel[id]; });
       render(); toast(t('toastPinned'));
-    }).withFailureHandler(fail).pinImportant(ids);
+    }).withFailureHandler(fail).pinImportant(ids, ids.some(function (id) { var m = find(id); return m && isOld(m); }));
   }
 
   // ===== KURANG PENTING (emel ini sahaja / pengirim ini) =====
@@ -921,7 +936,7 @@
       }
       b += B('yl', 'fwd', L('fwd'), { href: gm ? gl : compose('', '', d.subject, fwdOf(d), true) });
       var em = mode;
-      if (mode === 'srch') { var cm = find(id); em = cm ? (cm.action ? 'act' : cm.important ? 'imp' : 'oth') : ''; }
+      if (mode === 'srch') { var cm = find(id); em = cm ? (cm.action ? 'act' : cm.important ? 'imp' : 'oth') : 'oth'; }
       if (em === 'act') b += B('gr', 'check', L('done'), { on: "doneMail('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else if (em === 'imp') b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'down', L('less'), { on: "lessDlg('" + id + "')" });
       else if (em) b += B('gr', 'flag', L('toAct'), { on: "toAct('" + id + "')" }) + B('yl', 'star', L('markImp'), { on: "bulkOne('" + id + "')" });
@@ -1242,6 +1257,6 @@
   swipeCard($('acard'), 'act', function () { return actList().length; }, stepA, function () { return actIdx; });
 </script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});</script>
-<footer id="credit"><b>Read My Mail</b> · Developed by FaridAssamani · ©2026 · v30.10.d</footer>
+<footer id="credit"><b>Read My Mail</b> · Developed by FaridAssamani · ©2026 · v30.10.f</footer>
 </body>
 </html>
