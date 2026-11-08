@@ -102,7 +102,7 @@
   }
   function signOut() {
     try { if (tok && window.google && google.accounts) google.accounts.oauth2.revoke(tok.t, function () {}); } catch (e) {}
-    ['rmm_tok', 'rmm_me', 'rmm_tc', 'rmm_state', 'rmm_fid'].forEach(lsDel);
+    ['rmm_tok', 'rmm_stok', 'rmm_me', 'rmm_tc', 'rmm_state', 'rmm_fid'].forEach(lsDel);
     location.reload();
   }
 
@@ -123,9 +123,39 @@
   }
   var JSONH = { 'Content-Type': 'application/json' };
 
+  // ---------- Skip inbox (penapis Gmail): kebenaran tambahan 'gmail.settings.basic' diminta hanya bila pertama kali digunakan ----------
+  var SETTINGS_SCOPE = 'https://www.googleapis.com/auth/gmail.settings.basic';
+  var stok = lsGet('rmm_stok');
+  function consentErr(msg) { var e = new Error(msg); e.code = 'CONSENT'; return e; }
+  function settingsToken() {
+    if (stok && stok.t && stok.exp > Date.now() + 60000) return Promise.resolve(stok.t);
+    return new Promise(function (res, rej) {
+      if (!(window.google && google.accounts && google.accounts.oauth2)) return rej(consentErr('GIS'));
+      var c = google.accounts.oauth2.initTokenClient({ client_id: CFG.CLIENT_ID, scope: SETTINGS_SCOPE,
+        callback: function (r) {
+          if (r.error) return rej(consentErr(r.error));
+          stok = { t: r.access_token, exp: Date.now() + (Number(r.expires_in) || 3600) * 1000 }; lsSet('rmm_stok', stok); res(stok.t);
+        },
+        error_callback: function (e) { rej(consentErr((e && e.type) || 'popup')); } });
+      var o = { prompt: '' }, hint = lsGet('rmm_me'); if (hint) o.hint = hint;
+      c.requestAccessToken(o);
+    });
+  }
+  function sfetch(url, opt, retried) {
+    return settingsToken().then(function (t) {
+      opt = opt || {};
+      opt.headers = Object.assign({ Authorization: 'Bearer ' + t }, opt.headers || {});
+      return fetch(url, opt).then(function (r) {
+        if (r.status === 401 && !retried) { stok = null; lsDel('rmm_stok'); return sfetch(url, opt, true); }
+        if (!r.ok) return r.text().then(function (tx) { throw new Error('API ' + r.status + ': ' + String(tx).substring(0, 180)); });
+        return r.status === 204 ? null : r.json().catch(function () { return null; });
+      });
+    });
+  }
+
   // ---------- Status & tetapan (Drive appDataFolder) ----------
   var STATE = null, FILE_ID = lsGet('rmm_fid'), saveT = null, dirty = false;
-  function emptyState() { return { settings: {}, done: [], manual: [], dismissed: [], pinned: [], evUp: [], evDown: [] }; }
+  function emptyState() { return { settings: {}, done: [], manual: [], dismissed: [], pinned: [], evUp: [], evDown: [], oldkeep: [], skip: [] }; }
   function normState(s) { var e = emptyState(); s = s || {}; Object.keys(e).forEach(function (k) { if (s[k] !== undefined) e[k] = s[k]; }); return e; }
 
   function findFile() {
@@ -421,6 +451,52 @@
     });
   }
 
+  var SKIP_LABEL = 'Skip inbox';
+  function skipLabelId() {
+    return gfetch(GM + '/labels').then(function (r) {
+      var l = ((r && r.labels) || []).filter(function (x) { return x.name === SKIP_LABEL; })[0];
+      if (l) return l.id;
+      return gfetch(GM + '/labels', { method: 'POST', headers: JSONH, body: JSON.stringify({ name: SKIP_LABEL, labelListVisibility: 'labelShow', messageListVisibility: 'show' }) }).then(function (x) { return x.id; });
+    });
+  }
+  // Cipta penapis Gmail untuk pengirim (lalai: tidak masuk Inbox + label 'Skip inbox') dan alihkan emel sedia ada keluar daripada Inbox
+  function skipInbox(froms) {
+    var addrsList = []; (froms || []).forEach(function (f) { var a = addrs(f)[0]; if (a && addrsList.indexOf(a) < 0) addrsList.push(a); });
+    if (!addrsList.length) return Promise.reject(new Error('Alamat pengirim tidak dijumpai / Sender address not found'));
+    var lid, moved = 0;
+    return needState().then(function () { return settingsToken(); }).then(function () { return skipLabelId(); }).then(function (id) {
+      lid = id;
+      return sfetch(GM + '/settings/filters');
+    }).then(function (fl) {
+      var have = {}; ((fl && fl.filter) || []).forEach(function (f) { if (f.criteria && f.criteria.from && f.action && (f.action.removeLabelIds || []).indexOf('INBOX') > -1) have[String(f.criteria.from).toLowerCase()] = f.id; });
+      var chain = Promise.resolve();
+      addrsList.forEach(function (a) {
+        chain = chain.then(function () {
+          var mk = have[a] ? Promise.resolve(have[a]) : sfetch(GM + '/settings/filters', { method: 'POST', headers: JSONH, body: JSON.stringify({ criteria: { from: a }, action: { addLabelIds: [lid], removeLabelIds: ['INBOX'] } }) }).then(function (f) { return f.id; });
+          return mk.then(function (fid) {
+            STATE.skip = (STATE.skip || []).filter(function (x) { return x.a !== a; }).concat([{ a: a, f: fid }]);
+            return gfetch(GM + '/threads?maxResults=100&q=' + encodeURIComponent('from:' + a + ' in:inbox'));
+          }).then(function (r) {
+            var ts = (r && r.threads) || [];
+            return Promise.all(ts.map(function (t) {
+              return gfetch(GM + '/threads/' + t.id + '/modify', { method: 'POST', headers: JSONH, body: JSON.stringify({ addLabelIds: [lid], removeLabelIds: ['INBOX'] }) }).then(function () { moved++; }, function () {});
+            }));
+          });
+        });
+      });
+      return chain;
+    }).then(function () { persist(); return { senders: addrsList, moved: moved, skip: STATE.skip }; });
+  }
+  function unskipInbox(addr) {
+    return needState().then(function () {
+      var it = (STATE.skip || []).filter(function (x) { return x.a === addr; })[0];
+      if (!it) return { skip: STATE.skip || [] };
+      return sfetch(GM + '/settings/filters/' + it.f, { method: 'DELETE' }).catch(function (e) { if (!/404/.test(String(e.message))) throw e; }).then(function () {
+        STATE.skip = (STATE.skip || []).filter(function (x) { return x.a !== addr; }); persist(); return { skip: STATE.skip };
+      });
+    });
+  }
+
   function trashThreads(ids) {
     return Promise.all(ids.map(function (id) { return gfetch(GM + '/threads/' + id + '/trash', { method: 'POST' }); })).then(function () { return ids.length; });
   }
@@ -527,13 +603,15 @@
           r[2].forEach(function (e) { if (e.link) e.link += (e.link.indexOf('?') > -1 ? '&' : '?') + 'authuser=' + encodeURIComponent(me); });
           var tk = r[4] || { items: [], auth: false };
           r[2] = r[2].concat(tk.items).sort(function (x, y) { return (new Date(x.start) - new Date(y.start)) || ((x.task ? 1 : 0) - (y.task ? 1 : 0)); });
-          return { me: me, settings: cfg, emails: r[1], events: r[2], tasksAuth: tk.auth, todayCount: r[3].n, todayStale: !!r[3].stale, todayErr: r[3].err || '', todayQ: r[3].q, updated: new Date().toISOString() };
+          return { me: me, settings: cfg, emails: r[1], events: r[2], tasksAuth: tk.auth, skipList: (STATE && STATE.skip) || [], todayCount: r[3].n, todayStale: !!r[3].stale, todayErr: r[3].err || '', todayQ: r[3].q, updated: new Date().toISOString() };
         });
       });
     },
     getEmailDetail: getEmailDetail,
     trashThreads: trashThreads,
     searchMail: searchMail,
+    skipInbox: skipInbox,
+    unskipInbox: unskipInbox,
     saveSettings: function (s) { return needState().then(function () { return saveSettings(s); }); },
     resetLists: function () { return needState().then(function () { var st = STATE.settings || {}; st.add = {}; st.del = {}; STATE.settings = st; persist(); return getSettings(); }); },
     muteSender: function (from) {
