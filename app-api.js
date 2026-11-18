@@ -155,7 +155,7 @@
 
   // ---------- Status & tetapan (Drive appDataFolder) ----------
   var STATE = null, FILE_ID = lsGet('rmm_fid'), saveT = null, dirty = false;
-  function emptyState() { return { settings: {}, done: [], manual: [], dismissed: [], pinned: [], evUp: [], evDown: [], oldkeep: [], skip: [] }; }
+  function emptyState() { return { settings: {}, done: [], manual: [], dismissed: [], pinned: [], evUp: [], evDown: [], oldkeep: [], skip: [], like: [] }; }
   function normState(s) { var e = emptyState(); s = s || {}; Object.keys(e).forEach(function (k) { if (s[k] !== undefined) e[k] = s[k]; }); return e; }
 
   function findFile() {
@@ -286,6 +286,21 @@
     return has(s + ' ' + body.toLowerCase().substring(0, 160), cfg.meetingWords);
   }
 
+  // 'Emel seperti ini': tajuk dinormalkan (buang Re:/Fwd:, nombor, tarikh, bulan) supaya emel berkala dikenali sebagai sama
+  var MONTHS = 'jan|feb|mac|mar|apr|mei|may|jun|jul|ogos|ogo|aug|sep|sept|okt|oct|nov|dis|dec|januari|februari|march|april|june|july|august|september|oktober|october|november|disember|december';
+  function normSubj(s) {
+    s = String(s || '').toLowerCase();
+    s = s.replace(/^(\s*(re|fw|fwd|balas|ts)\s*:\s*)+/, '').replace(/\[[^\]]*\]/g, ' ');
+    s = s.replace(new RegExp('\\b(' + MONTHS + ')\\b', 'g'), ' ').replace(/[0-9]+/g, ' ').replace(/[^a-z\u00c0-\u024f ]+/g, ' ');
+    return s.replace(/\s+/g, ' ').trim();
+  }
+  function likeMatch(from, subject) {
+    var rules = (STATE && STATE.like) || []; if (!rules.length) return false;
+    var f = addrs(from)[0], p = normSubj(subject);
+    for (var i = 0; i < rules.length; i++) if (rules[i].a === f && rules[i].p === p) return true;
+    return false;
+  }
+
   function buildEmail(c, cfg) {
     var done = listOf('done'), manual = listOf('manual'), dismissed = listOf('dismissed'), pinned = listOf('pinned');
     var hay = (c.subject + ' ' + c.from).toLowerCase(), muted = has(c.from.toLowerCase(), cfg.muted), score = 0;
@@ -293,6 +308,7 @@
     if (c.starred) score += 3;
     if (has(hay, cfg.vip)) score += 3;
     if (has(hay, cfg.keywords)) score += 2;
+    if (!muted && manual.indexOf(c.id) < 0 && pinned.indexOf(c.id) < 0 && likeMatch(c.from, c.subject)) muted = true;
     if (muted) score = 0;
 
     var id = c.id, isPinned = pinned.indexOf(id) > -1;
@@ -603,7 +619,7 @@
           r[2].forEach(function (e) { if (e.link) e.link += (e.link.indexOf('?') > -1 ? '&' : '?') + 'authuser=' + encodeURIComponent(me); });
           var tk = r[4] || { items: [], auth: false };
           r[2] = r[2].concat(tk.items).sort(function (x, y) { return (new Date(x.start) - new Date(y.start)) || ((x.task ? 1 : 0) - (y.task ? 1 : 0)); });
-          return { me: me, settings: cfg, emails: r[1], events: r[2], tasksAuth: tk.auth, skipList: (STATE && STATE.skip) || [], todayCount: r[3].n, todayStale: !!r[3].stale, todayErr: r[3].err || '', todayQ: r[3].q, updated: new Date().toISOString() };
+          return { me: me, settings: cfg, emails: r[1], events: r[2], tasksAuth: tk.auth, skipList: (STATE && STATE.skip) || [], likeList: (STATE && STATE.like) || [], todayCount: r[3].n, todayStale: !!r[3].stale, todayErr: r[3].err || '', todayQ: r[3].q, updated: new Date().toISOString() };
         });
       });
     },
@@ -611,6 +627,16 @@
     trashThreads: trashThreads,
     searchMail: searchMail,
     skipInbox: skipInbox,
+    likeMail: function (from, subject) {
+      return needState().then(function () {
+        var ad = addrs(from)[0], p = normSubj(subject);
+        if (!ad || !p) throw new Error('Tajuk/pengirim tidak sesuai / Subject or sender not suitable');
+        var L = (STATE.like || []).filter(function (x) { return !(x.a === ad && x.p === p); });
+        L.push({ a: ad, p: p, s: String(subject).substring(0, 90) }); STATE.like = L.slice(-100); persist();
+        return { like: STATE.like };
+      });
+    },
+    unlikeMail: function (i) { return needState().then(function () { STATE.like = (STATE.like || []).filter(function (x, k) { return k !== i; }); persist(); return { like: STATE.like }; }); },
     unskipInbox: unskipInbox,
     saveSettings: function (s) { return needState().then(function () { return saveSettings(s); }); },
     resetLists: function () { return needState().then(function () { var st = STATE.settings || {}; st.add = {}; st.del = {}; STATE.settings = st; persist(); return getSettings(); }); },
@@ -663,5 +689,5 @@
     var b = document.getElementById('inst'); if (b) b.style.display = 'none';
   }
 
-  window.RMM = { run: mk(null, null), signIn: signIn, signOut: signOut, install: install, _api: API, get partial() { return PARTIAL; } };
+  window.RMM = { run: mk(null, null), signIn: signIn, signOut: signOut, install: install, _api: API, _norm: normSubj, get partial() { return PARTIAL; } };
 })();
